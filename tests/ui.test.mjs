@@ -50,3 +50,15 @@ test('offline installation caches all application entrypoints',()=>{
  }
  assert.match(html,/rel="manifest"/);
 });
+
+test('batch workspace integrates without changing dock geometry',()=>{
+ assert.match(html,/id="view-batch"/);
+ assert.match(html,/id="tab-batch"/);
+ for(const id of ['batch-picker','batch-create','batch-measurement','batch-add','batch-chart',
+  'batch-count','batch-good','batch-bad','batch-readings','batch-undo','batch-export','batch-delete']){
+  assert.equal((html.match(new RegExp('id="'+id+'"','g'))||[]).length,1);
+ }
+ assert.match(app,/initBatch\(\{getCurrent:\(\)=>current,toast\}\)/);
+ assert.match(css,/\.dock\{position:fixed;left:50%;transform:translateX\(-50%\);bottom:2px;width:87%;height:68px;/);
+ for(const path of ['./src/batch.js','./src/batch-core.js'])assert.ok(worker.includes("'"+path+"'"));
+});
