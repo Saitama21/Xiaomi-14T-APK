@@ -77,7 +77,7 @@ test('premium stays offline-friendly and retains fixed dock source of truth',()=
  assert.doesNotMatch(html,/<script[^>]+https?:\/\//);
  assert.doesNotMatch(css,/@import\s+url\(/);
  assert.match(css,/\.dock\{position:fixed;left:50%;transform:translateX\(-50%\);bottom:2px;width:87%;height:68px;/);
- assert.match(worker,/precision-gauge-v8/);
+ assert.match(worker,/precision-gauge-v9/);
 });
 
 test('2.1 inspector provides accessible SVG chart point controls',()=>{
