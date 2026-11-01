@@ -68,7 +68,7 @@ test('CSV contains all readings and protects formula-like names',()=>{
  assert.match(csv,/25,050001/);
  assert.match(csv,/Годен/);
  assert.match(csv,/Брак/);
- assert.equal(csv.trim().split('\\r\\n').length,9);
+ assert.equal(csv.trim().split(/\r\n/).length,8);
 });
 test('zero tolerance: exact measurement alone is accepted',()=>{
  const c=getCalculation({mode:'manual',nominal:'18',upper:'0',lower:'0',measured:''});
