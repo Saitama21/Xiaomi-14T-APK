@@ -21,6 +21,8 @@ jobs:
         with:
           node-version: '22'
       - run: npm run check
+      - name: Browser responsiveness smoke
+        run: node tests/browser-smoke.mjs
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: verify
