@@ -1,3 +1,4 @@
+import {initBatch,refreshBatch} from './batch.js';
 import {getCalculation,fmt,fmtSigned,formatHalfUnits,DimensionError,precisionOf} from './core.js';
 const $=id=>document.getElementById(id);
 const KEYS={inputs:'precision-gauge-inputs-v1',history:'precision-gauge-history-v1',theme:'precision-gauge-theme-v1'};
@@ -34,7 +35,7 @@ function update(){snapshot();$('clear-measured').hidden=state.measured.trim()===
   delta.textContent=`${sign}${formatHalfUnits(doubledDelta,r.targetPrecision)} мм от цели`;
  }
  }catch(error){current=null;$('calc-error').textContent=error instanceof DimensionError?error.message:'Ошибка ввода размера';for(const id of ['target','min','max','gauge-min','gauge-max'])$(id).textContent='—';$('gauge-span').textContent='ПОЛЕ —';$('gauge-marker').hidden=true;$('gauge-low').hidden=true;$('gauge-high').hidden=true;$('gauge-feedback').textContent='Проверь параметры расчёта';$('tolerance-gauge').dataset.state='error';$('tolerance-gauge').setAttribute('aria-label','Ошибка в параметрах расчёта');$('status').className='status-bad';$('status').textContent='НЕТ РАСЧЁТА';$('delta').textContent='Проверь значения';$('save-result').disabled=true;$('copy-result').disabled=true}}
-function switchPage(page){activePage=page;for(const key of ['calc','history','settings']){$('view-'+key).hidden=key!==page;$('tab-'+key).classList.toggle('is-active',key===page);if(key===page)$('tab-'+key).setAttribute('aria-current','page');else $('tab-'+key).removeAttribute('aria-current')}if(page==='history')renderHistory()}
+function switchPage(page){activePage=page;for(const key of ['calc','batch','history','settings']){$('view-'+key).hidden=key!==page;$('tab-'+key).classList.toggle('is-active',key===page);if(key===page)$('tab-'+key).setAttribute('aria-current','page');else $('tab-'+key).removeAttribute('aria-current')}if(page==='history')renderHistory();if(page==='batch')refreshBatch()}
 function historyItems(){const data=read(KEYS.history,[]);return Array.isArray(data)?data.filter(x=>x&&typeof x==='object'&&typeof x.nominal==='string').slice(0,MAX_HISTORY):[]}
 function save(){if(!current)return;const items=historyItems();items.unshift({mode:state.mode,nominal:state.nominal,upper:state.upper,lower:state.lower,fit:state.fit,grade:state.grade,measured:state.measured,timestamp:Date.now()});store(KEYS.history,items.slice(0,MAX_HISTORY));historyPage=0;toast('Расчёт сохранён на устройстве')}
 function loadHistory(item){for(const k of Object.keys(defaults))if(typeof item[k]==='string')state[k]=item[k];for(const k of ['nominal','upper','lower','fit','grade','measured'])$(k).value=state[k];setMode(state.mode);switchPage('calc');toast('Расчёт восстановлен')}
@@ -59,10 +60,10 @@ for(let i=0;i<ENTER_ORDER.length;i++){
 $('upper-sign').addEventListener('click',()=>toggleDeviationSign('upper'));
 $('lower-sign').addEventListener('click',()=>toggleDeviationSign('lower'));
 $('clear-measured').addEventListener('click',clearMeasurement);
-restore();update();
+restore();update();initBatch({getCurrent:()=>current,toast});
 for(const k of ['nominal','upper','lower','fit','grade','measured'])$(k).addEventListener(k==='fit'||k==='grade'?'change':'input',update);
 $('mode-manual').addEventListener('click',()=>setMode('manual'));$('mode-iso').addEventListener('click',()=>setMode('iso'));
-for(const page of ['calc','history','settings'])$('tab-'+page).addEventListener('click',()=>switchPage(page));
+for(const page of ['calc','batch','history','settings'])$('tab-'+page).addEventListener('click',()=>switchPage(page));
 $('save-result').addEventListener('click',save);$('copy-result').addEventListener('click',copy);$('theme-toggle').addEventListener('click',toggleTheme);$('theme-setting').addEventListener('click',toggleTheme);
 $('clear-history').addEventListener('click',()=>{if(historyItems().length===0)return;if(window.confirm('Очистить все сохранённые расчёты на этом устройстве?')){store(KEYS.history,[]);historyPage=0;renderHistory();toast('История очищена')}});
 $('history-prev').addEventListener('click',()=>{historyPage--;renderHistory()});$('history-next').addEventListener('click',()=>{historyPage++;renderHistory()});

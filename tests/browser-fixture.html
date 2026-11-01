@@ -1,0 +1,47 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Precision Gauge visual smoke</title>
+<pre id="results" data-status="pending">RUNNING</pre>
+<script>
+(async()=>{
+ const output=document.querySelector('#results');
+ const check=(condition,message)=>{if(!condition)throw Error(message)};
+ const outcomes=[];
+ for(const [width,height] of [[390,844],[375,740],[320,667],[768,900]]){
+  const iframe=document.createElement('iframe');
+  iframe.style.cssText='border:0;display:block;width:'+width+'px;height:'+height+'px';
+  iframe.src='/index.html?browser-smoke='+width;
+  document.body.append(iframe);
+  await new Promise((resolve,reject)=>{iframe.addEventListener('load',resolve,{once:true});iframe.addEventListener('error',()=>reject(Error('iframe load failed')),{once:true})});
+  const w=iframe.contentWindow,d=iframe.contentDocument;
+  check(d.querySelector('#tab-batch'),'Batch navigation tab missing at '+width);
+  const dock=d.querySelector('.dock'),rect=dock.getBoundingClientRect();
+  check(w.getComputedStyle(dock).position==='fixed','Dock not fixed at '+width);
+  check(Math.abs(rect.bottom-(height-2))<=1.5,'Dock bottom differs at '+width+': '+rect.bottom);
+  check(Math.abs(rect.width-Math.min(width*.87, width>=700?510:640))<=1.5,'Dock width differs at '+width);
+  check(Math.abs((rect.left+rect.right)/2-width/2)<=1.5,'Dock not centered at '+width);
+  check(d.documentElement.scrollWidth<=width+1,'Horizontal overflow at '+width);
+  d.querySelector('#tab-batch').click();
+  check(!d.querySelector('#view-batch').hidden,'Batch screen did not open at '+width);
+  d.querySelector('#batch-new').click();
+  check(!d.querySelector('#batch-creation').hidden,'New batch form did not open at '+width);
+  d.querySelector('#batch-name').value='UI smoke '+width;
+  d.querySelector('#batch-create').click();
+  check(d.querySelector('#batch-count').textContent==='0','Batch creation failed at '+width);
+  const input=d.querySelector('#batch-measurement');
+  input.value='25,025';d.querySelector('#batch-add').click();
+  check(d.querySelector('#batch-count').textContent==='1','Measure not recorded at '+width);
+  check(d.querySelector('#batch-good').textContent==='1','Good sample not counted at '+width);
+  input.value='25,051';d.querySelector('#batch-add').click();
+  check(d.querySelector('#batch-bad').textContent==='1','Reject not counted at '+width);
+  d.querySelector('#batch-undo').click();
+  check(d.querySelector('#batch-bad').textContent==='0','Undo did not work at '+width);
+  check(d.querySelector('#batch-count').textContent==='1','Undo did not restore count at '+width);
+  check(d.querySelector('#batch-chart').childElementCount>0,'Trend SVG missing at '+width);
+  outcomes.push(width+'x'+height+': PASS');
+  iframe.remove();
+ }
+ output.dataset.status='ok';
+ output.textContent=outcomes.join('\n');
+})().catch(error=>{const output=document.querySelector('#results');output.dataset.status='fail';output.textContent='FAIL '+error.stack});
+</script>
