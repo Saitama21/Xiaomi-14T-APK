@@ -3,28 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#090f1a">
+<meta name="theme-color" content="#0a1015">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Допуски PRO">
-<meta name="description" content="Калькулятор допусков и размеров с чертежа: ISO 286 H/h, контроль замеров, офлайн PWA.">
+<meta name="description" content="Precision Gauge Pro — инженерный контроль допусков, измерения партий, ISO 286 и автономный журнал. Offline-first.">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png" sizes="180x180">
 <link rel="stylesheet" href="./src/styles.css">
-<title>Допуски PRO · Precision Gauge</title>
+<title>Precision Gauge Pro 2.0 · Допуски</title>
 </head>
 <body>
 <main class="app-shell" id="app-shell">
 <header class="app-header">
-  <div class="brand"><div class="brand-symbol" aria-hidden="true">⌀</div><div class="brand-wordmark"><strong>ДОПУСКИ <span>PRO</span></strong><small>PRECISION / CNC</small></div></div>
+  <div class="brand"><div class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="16" cy="16" r="9"/><circle cx="16" cy="16" r="3"/><path d="M16 1v8m0 14v8M1 16h8m14 0h8"/></svg></div><div class="brand-wordmark"><strong>PRECISION <span>GAUGE</span></strong><small>PRO / ENGINEERING WORKSPACE</small></div></div>
   <button class="icon-button" id="theme-toggle" type="button" aria-label="Переключить тему" title="Сменить тему"><svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
 </header>
 <section class="view is-visible" id="view-calc" aria-label="Калькулятор">
 <div class="mode-switch" role="group" aria-label="Режим расчёта"><button class="is-active" id="mode-manual" type="button" aria-pressed="true">По чертежу</button><button id="mode-iso" type="button" aria-pressed="false">ISO 286 · H/h</button></div>
 <div class="work-grid">
 <section class="surface input-card" aria-labelledby="input-heading">
- <div class="card-heading"><h1 id="input-heading">ГЕОМЕТРИЯ ДЕТАЛИ</h1><span>Миллиметры / mm</span></div>
+ <div class="card-heading"><h1 id="input-heading"><em>01</em> ПАРАМЕТРЫ ДЕТАЛИ</h1><span class="unit-chip">ЕД. ИЗМ. / mm</span></div>
  <div class="field"><label for="nominal">Номинальный размер</label><div class="input-shell nominal-shell"><span aria-hidden="true">⌀</span><input id="nominal" type="text" inputmode="decimal" autocomplete="off" autocapitalize="off" spellcheck="false" value="25,000" aria-describedby="calc-error"></div></div>
  <div id="manual-fields" class="field-pair"><div class="field"><label for="upper">Верхнее отклонение</label><div class="input-shell deviation-shell"><button class="sign-toggle" id="upper-sign" type="button" aria-label="Изменить знак верхнего отклонения" title="Изменить знак">±</button><input id="upper" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="+0,050"></div></div><div class="field"><label for="lower">Нижнее отклонение</label><div class="input-shell deviation-shell"><button class="sign-toggle" id="lower-sign" type="button" aria-label="Изменить знак нижнего отклонения" title="Изменить знак">±</button><input id="lower" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="0,000"></div></div></div>
  <div id="iso-fields" class="field-pair" hidden><div class="field"><label for="fit">Поле допуска</label><div class="input-shell select-shell"><select id="fit"><option value="H">H · Отверстие</option><option value="h">h · Вал</option></select></div></div><div class="field"><label for="grade">Квалитет</label><div class="input-shell select-shell"><select id="grade"><option value="5">IT5</option><option value="6">IT6</option><option value="7">IT7</option><option value="8">IT8</option><option value="9" selected>IT9</option><option value="10">IT10</option><option value="11">IT11</option><option value="12">IT12</option></select></div></div></div>
@@ -32,22 +32,22 @@
  <p class="form-error" id="calc-error" aria-live="polite" role="status"></p>
 </section>
 <section class="surface result-card" aria-labelledby="result-heading">
- <div class="card-heading result-heading"><h2 id="result-heading">ЦЕЛЕВОЙ РАЗМЕР</h2><div class="result-actions"><button class="mini-action" id="save-result" type="button" aria-label="Сохранить расчёт" title="Сохранить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 2 3 6.4 7 .9-5 5 .9 7.1L12 18l-5.9 3.4L7 14.3l-5-5 7-.9z"/></svg></button><button class="mini-action" id="copy-result" type="button" aria-label="Копировать расчёт" title="Копировать"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button></div></div>
- <div class="target-row"><output class="target" id="target">25,025</output><span>мм</span></div>
- <div class="target-caption">Середина поля допуска · ориентир для обработки</div>
+ <div class="card-heading result-heading"><h2 id="result-heading"><em>02</em> ЦЕЛЕВОЙ РАЗМЕР</h2><div class="result-actions"><button class="mini-action" id="save-result" type="button" aria-label="Сохранить расчёт" title="Сохранить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 2 3 6.4 7 .9-5 5 .9 7.1L12 18l-5.9 3.4L7 14.3l-5-5 7-.9z"/></svg></button><button class="mini-action" id="copy-result" type="button" aria-label="Копировать расчёт" title="Копировать"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button></div></div>
+ <div class="target-row"><span class="target-diameter" aria-hidden="true">⌀</span><output class="target" id="target">25,025</output><span>мм</span></div>
+ <div class="target-caption"><span class="target-caption-dot" aria-hidden="true"></span> Середина допуска · ориентир обработки</div>
  <div class="result-metrics"><div><span>МИНИМУМ</span><output id="min">25,000</output></div><div><span>МАКСИМУМ</span><output id="max">25,050</output></div></div>
  <div class="gauge-heading"><span>ДИАПАЗОН ДОПУСКА</span><span id="gauge-span">ПОЛЕ 0,050 мм</span></div>
  <div class="gauge" id="tolerance-gauge" role="img" aria-label="Диапазон допуска от 25,000 до 25,050 мм; фактический замер не введён">
-  <div class="gauge-track"><span class="center-line"></span><span class="measure-line" id="gauge-marker" hidden></span><span class="gauge-outside gauge-outside-low" id="gauge-low" hidden aria-hidden="true">‹</span><span class="gauge-outside gauge-outside-high" id="gauge-high" hidden aria-hidden="true">›</span></div>
-  <div class="gauge-limits"><span id="gauge-min">25,000</span><span id="gauge-max">25,050</span></div>
+  <div class="gauge-track"><span class="gauge-reference-line"></span><span class="center-line"></span><span class="measure-line" id="gauge-marker" hidden></span><span class="gauge-outside gauge-outside-low" id="gauge-low" hidden aria-hidden="true">‹</span><span class="gauge-outside gauge-outside-high" id="gauge-high" hidden aria-hidden="true">›</span></div>
+  <div class="gauge-limits"><span id="gauge-min">25,000</span><span class="gauge-center-label">ЦЕЛЬ</span><span id="gauge-max">25,050</span></div>
   <p class="gauge-feedback" id="gauge-feedback" aria-live="polite">Введи фактический замер для контроля</p>
  </div>
 </section>
-<section class="surface measure-card" aria-labelledby="measure-heading"><div class="measure-control"><h2 id="measure-heading">ФАКТИЧЕСКИЙ ЗАМЕР</h2><div class="input-shell measure-shell"><input id="measured" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="Введите размер" aria-label="Фактический замер в миллиметрах"><button class="clear-measured" id="clear-measured" type="button" aria-label="Очистить фактический замер" title="Очистить замер" hidden>×</button></div></div><div class="measure-status"><span>КОНТРОЛЬ РАЗМЕРА</span><strong class="status-empty" id="status" aria-live="polite">ОЖИДАНИЕ</strong><small id="delta">Введи замер</small></div></section>
+<section class="surface measure-card" aria-labelledby="measure-heading"><div class="measure-control"><h2 id="measure-heading"><em>03</em> ФАКТИЧЕСКИЙ ЗАМЕР</h2><div class="input-shell measure-shell"><input id="measured" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="Введите размер" aria-label="Фактический замер в миллиметрах"><button class="clear-measured" id="clear-measured" type="button" aria-label="Очистить фактический замер" title="Очистить замер" hidden>×</button></div></div><div class="measure-status"><span>СТАТУС ИЗМЕРЕНИЯ</span><strong class="status-empty" id="status" aria-live="polite">ОЖИДАНИЕ</strong><small id="delta">Введи замер</small></div></section>
 </div>
 </section>
 <section class="view auxiliary batch-view" id="view-batch" aria-label="Контроль партии" hidden>
-  <div class="batch-heading"><div><small>QUALITY CONTROL / CNC</small><h1>Контроль партии</h1></div><span class="batch-offline"><span aria-hidden="true">●</span> Локально</span></div>
+  <div class="batch-heading"><div><small>WORKSPACE / QUALITY CONTROL</small><h1>Контроль партии</h1></div><span class="batch-offline"><span aria-hidden="true">●</span> OFFLINE READY</span></div>
   <div class="batch-toolbar"><label class="sr-only" for="batch-picker">Выбрать партию</label><select id="batch-picker" aria-label="Сохранённые партии"><option value="">Нет партий</option></select><button id="batch-new" class="secondary-button" type="button">+ Новая</button></div>
   <section class="surface batch-creation" id="batch-creation" hidden aria-label="Новая партия">
    <div><strong>Новая партия из текущего расчёта</strong><small id="batch-calculation-preview">Вернись в «Расчёт» и введи допуск</small></div>
@@ -67,8 +67,27 @@
    <div class="batch-bottom-actions"><button class="secondary-button" type="button" id="batch-export" disabled>Экспорт CSV</button><button class="batch-link batch-delete" type="button" id="batch-delete">Удалить партию</button></div>
   </div>
 </section>
-<section class="view auxiliary" id="view-history" aria-label="Сохранённые размеры" hidden><div class="aux-heading"><div><small>ЛОКАЛЬНЫЙ ЖУРНАЛ</small><h1>Сохранённое</h1></div><button class="text-action" id="clear-history" type="button">Очистить</button></div><div class="surface history-list" id="history-list"><p class="empty">Пока нет сохранённых расчётов.</p></div><div class="page-controls"><button class="secondary-button" id="history-prev" type="button">← Назад</button><span id="history-page">1 / 1</span><button class="secondary-button" id="history-next" type="button">Далее →</button></div></section>
-<section class="view auxiliary" id="view-settings" aria-label="Параметры" hidden><div class="aux-heading"><div><small>PRECISION GAUGE</small><h1>Параметры</h1></div></div><div class="surface settings-panel"><div class="setting-line"><div><strong>Оформление</strong><small>Тёмная или светлая тема</small></div><button class="secondary-button" id="theme-setting" type="button">Сменить</button></div><div class="setting-line"><div><strong>Точность расчётов</strong><small>До 0,000001 мм, без округления входных данных</small></div></div><div class="setting-line"><div><strong>Стандарт ISO 286</strong><small>Поля H/h · IT5–IT12 · номиналы до 500 мм</small></div></div><div class="setting-line"><div><strong>Хранение</strong><small>Расчёты остаются на устройстве. Никаких аккаунтов.</small></div></div></div><p class="help-copy">Если на чертеже указаны числовые отклонения, используй их в режиме «По чертежу». Цветной индикатор «У границы» — дополнительное предупреждение в пределах 10% от границы, а не новый допуск. Целевой размер — середина поля допуска, не обязательная уставка станка.</p></section>
+<section class="view auxiliary" id="view-history" aria-label="Сохранённые размеры" hidden><div class="aux-heading"><div><small>LIBRARY / SAVED MEASUREMENTS</small><h1>История расчётов</h1></div><button class="text-action" id="clear-history" type="button">Очистить</button></div><div class="section-caption"><span id="history-total">0 записей</span><span>Хранятся на этом устройстве</span></div><div class="surface history-list" id="history-list"><p class="empty">Пока нет сохранённых расчётов.</p></div><div class="page-controls"><button class="secondary-button" id="history-prev" type="button">← Назад</button><span id="history-page">1 / 1</span><button class="secondary-button" id="history-next" type="button">Далее →</button></div></section>
+<section class="view auxiliary settings-view" id="view-settings" aria-label="Параметры" hidden>
+  <div class="aux-heading"><div><small>SYSTEM / PREFERENCES</small><h1>Параметры</h1></div><span class="settings-version">V 2.0</span></div>
+  <div class="surface settings-feature"><div class="settings-feature-symbol" aria-hidden="true">⌀</div><div><strong>Precision Gauge Pro</strong><small>ENGINEERING / OFFLINE WORKSPACE</small></div><span class="settings-feature-led" aria-hidden="true"></span></div>
+  <section class="surface settings-panel" aria-label="Внешний вид">
+    <div class="settings-group-title">ИНТЕРФЕЙС</div>
+    <div class="setting-line setting-appearance"><div><strong>Тема оформления</strong><small>Автоматически или вручную</small></div></div>
+    <div class="theme-options" role="group" aria-label="Выбор темы">
+      <button type="button" class="theme-option" data-theme-choice="auto" aria-pressed="false"><span aria-hidden="true">◐</span> Система</button>
+      <button type="button" class="theme-option" data-theme-choice="dark" aria-pressed="true"><span aria-hidden="true">☾</span> Графит</button>
+      <button type="button" class="theme-option" data-theme-choice="light" aria-pressed="false"><span aria-hidden="true">☀</span> Титан</button>
+    </div>
+  </section>
+  <section class="surface settings-panel" aria-label="Инженерная информация">
+    <div class="settings-group-title">ИНЖЕНЕРНОЕ ЯДРО</div>
+    <div class="setting-line"><div><strong>Точность вычислений</strong><small>До 0,000001 мм · целочисленная арифметика</small></div><span class="setting-state">АКТИВНО</span></div>
+    <div class="setting-line"><div><strong>Стандарт ISO 286</strong><small>H/h · IT5–IT12 · до 500 мм</small></div><span class="setting-state">H / h</span></div>
+    <div class="setting-line"><div><strong>Локальные данные</strong><small>Расчёты и партии на устройстве</small></div><span class="setting-state">OFFLINE</span></div>
+  </section>
+  <p class="help-copy">Числовые отклонения с чертежа имеют приоритет. Предупреждение «У границы» не меняет поле допуска. Целевой размер — середина поля, а не обязательная наладочная уставка.</p>
+</section>
 </main>
 <nav class="dock" aria-label="Навигация"><button class="dock-tab is-active" id="tab-calc" type="button" data-page="calc" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 2v5m0 10v5M2 12h5m10 0h5"/></svg><span>Расчёт</span></button><button class="dock-tab" id="tab-batch" type="button" data-page="batch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/><path d="M7 5v14m10-14v14" opacity=".45"/></svg><span>Партия</span></button><button class="dock-tab" id="tab-history" type="button" data-page="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>История</span></button><button class="dock-tab" id="tab-settings" type="button" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2.2 2.2m9.6 9.6L19 19M19 5l-2.2 2.2m-9.6 9.6L5 19"/></svg><span>Параметры</span></button></nav>
 <div id="toast" role="status" aria-live="polite" hidden></div>
