@@ -2,6 +2,7 @@ import {initBatch,refreshBatch,getSavedBatchOverviews,openSavedBatch,exportBatch
 import {gaugeVisualState} from './inspection.js?v=3.0.0';
 import {getCalculation,fmt,fmtSigned,formatHalfUnits,DimensionError,precisionOf} from './core.js?v=3.0.0';
 import {exactHalfUnits,signedExactHalfUnits} from './display.js?v=3.0.0';
+import {createBackup,parseBackup} from './backup.js?v=3.0.0';
 const $=id=>document.getElementById(id);
 const KEYS={inputs:'precision-gauge-inputs-v1',history:'precision-gauge-history-v1',theme:'precision-gauge-theme-v1'};
 const defaults={mode:'manual',nominal:'25,000',upper:'+0,050',lower:'0,000',fit:'H',grade:'9',measured:''};
@@ -87,6 +88,41 @@ function loadHistory(item){for(const k of Object.keys(defaults))if(typeof item[k
 function renderHistory(){const items=historyItems(),pages=Math.max(1,Math.ceil(items.length/PAGE_SIZE));historyPage=Math.max(0,Math.min(historyPage,pages-1));const list=$('history-list');$('history-total').textContent=`${items.length} ${items.length===1?'запись':items.length%10>=2&&items.length%10<=4&&!(items.length%100>=12&&items.length%100<=14)?'записи':'записей'}`;list.replaceChildren();if(items.length===0){const p=document.createElement('p');p.className='empty';p.textContent='Пока нет сохранённых расчётов. Нажми ☆ на экране расчёта.';list.append(p)}for(const item of items.slice(historyPage*PAGE_SIZE,(historyPage+1)*PAGE_SIZE)){const entry=document.createElement('div');entry.className='history-entry';const info=document.createElement('div');const title=document.createElement('strong');const sub=document.createElement('small');const date=document.createElement('time');date.className='history-date';date.textContent=Number.isFinite(item.timestamp)?new Date(item.timestamp).toLocaleDateString('ru-RU',{day:'2-digit',month:'short',year:'numeric'}):'Локальный расчёт';try{const r=getCalculation(item);title.textContent=`⌀ ${fmt(r.nominal,r.decimals)}${item.mode==='iso'?' '+item.fit+item.grade:''}`;sub.textContent=`${fmt(r.min,r.decimals)} — ${fmt(r.max,r.decimals)} мм · цель ${exactHalfUnits(r.targetHalfUnits)}`}catch{continue}info.append(title,sub,date);const btn=document.createElement('button');btn.type='button';btn.textContent='Открыть';btn.addEventListener('click',()=>loadHistory(item));entry.append(info,btn);list.append(entry)}$('history-page').textContent=`${historyPage+1} / ${pages}`;$('history-prev').disabled=historyPage<=0;$('history-next').disabled=historyPage>=pages-1}
 function report(){const r=current;if(!r)return '';const d=r.decimals;return `⌀ ${fmt(r.nominal,d)} мм${state.mode==='iso'?' '+state.fit+state.grade:''}\nВерхнее отклонение: ${fmtSigned(r.upper,d)} мм\nНижнее отклонение: ${fmtSigned(r.lower,d)} мм\nМинимум: ${fmt(r.min,d)} мм\nМаксимум: ${fmt(r.max,d)} мм\nЦентр допуска: ${exactHalfUnits(r.targetHalfUnits)} мм\nШирина допуска: ${fmt(r.span,d)} мм${r.measured!==null?'\nЗамер: '+fmt(r.measured,d)+' мм — '+(r.inTolerance?'В ДОПУСКЕ':'ВНЕ ДОПУСКА'):''}`}
 async function copy(){if(!current)return;const text=report();try{await navigator.clipboard.writeText(text);toast('Расчёт скопирован')}catch{const area=document.createElement('textarea');area.value=text;area.style.position='absolute';area.style.left='-9999px';document.body.appendChild(area);area.select();let ok=false;try{ok=document.execCommand('copy')}catch{}area.remove();toast(ok?'Расчёт скопирован':'Не удалось скопировать расчёт')}}
+function downloadBackup(){
+ try{
+  const json=createBackup({inputs:{...state},history:historyItems(),theme:themePreference,
+   batchRecord:exportBatchRecord()});
+  const objectUrl=URL.createObjectURL(new Blob([json],{type:'application/json;charset=utf-8'}));
+  const link=document.createElement('a');link.download='precision-gauge-full-pro-'+new Date().toISOString().slice(0,10)+'.json';
+  link.href=objectUrl;document.body.append(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(objectUrl),30000);
+  toast('Архив подготовлен: сохрани файл в безопасном месте');
+ }catch(error){toast(error.message||'Не удалось создать архив')}
+}
+async function importBackup(file){
+ if(!file)return;
+ try{
+  if(file.size>3_000_000)throw new Error('Файл слишком большой');
+  const data=parseBackup(await file.text());
+  if(!window.confirm('Восстановить архив? Текущие партии, историю и настройки на этом устройстве заменит содержимое архива.'))return;
+  const pairs=[
+   [KEYS.inputs,JSON.stringify(data.inputs)],
+   [KEYS.history,JSON.stringify(data.history)],
+   [KEYS.theme,JSON.stringify(data.theme)],
+   ['precision-gauge-batches-v1',JSON.stringify(data.batches)]
+  ];
+  // Preserve every original value until the entire import is committed.
+  const originals=pairs.map(([key])=>[key,localStorage.getItem(key)]);
+  try{for(const [key,value] of pairs)localStorage.setItem(key,value)}
+  catch(error){
+   for(const [key,previous] of originals){
+    try{if(previous===null)localStorage.removeItem(key);else localStorage.setItem(key,previous)}catch{}
+   }
+   throw new Error('Не удалось сохранить архив. Место на устройстве закончилось');
+  }
+  window.location.reload();
+ }catch(error){toast(error.message||'Не удалось восстановить архив')}
+}
 const systemTheme=window.matchMedia?window.matchMedia('(prefers-color-scheme: light)'):null;
 function applyTheme(preference,persist=true){
  themePreference=preference;
@@ -132,6 +168,12 @@ $('mode-manual').addEventListener('click',()=>setMode('manual'));$('mode-iso').a
 for(const page of ['calc','batch','history','settings'])$('tab-'+page).addEventListener('click',()=>switchPage(page));
 for(const key of ['batches','calcs'])$('history-mode-'+key).addEventListener('click',()=>{historyMode=key;renderHistoryPanel()});
 for(const button of document.querySelectorAll('[data-history-filter]'))button.addEventListener('click',()=>{historyFilter=button.dataset.historyFilter;renderBatchHistory()});
+$('backup-export').addEventListener('click',downloadBackup);
+$('backup-import').addEventListener('click',()=>$('backup-file').click());
+$('backup-file').addEventListener('change',async event=>{
+ const file=event.target.files?.[0];
+ await importBackup(file);event.target.value='';
+});
 $('save-result').addEventListener('click',save);$('copy-result').addEventListener('click',copy);$('theme-toggle').addEventListener('click',toggleTheme);for(const btn of document.querySelectorAll('[data-theme-choice]'))btn.addEventListener('click',()=>applyTheme(btn.dataset.themeChoice));
 $('clear-history').addEventListener('click',()=>{if(historyItems().length===0)return;if(window.confirm('Очистить все сохранённые расчёты на этом устройстве?')){store(KEYS.history,[]);historyPage=0;renderHistory();toast('История очищена')}});
 $('history-prev').addEventListener('click',()=>{historyPage--;renderHistory()});$('history-next').addEventListener('click',()=>{historyPage++;renderHistory()});
