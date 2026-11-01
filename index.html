@@ -12,7 +12,7 @@
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png" sizes="180x180">
 <link rel="stylesheet" href="./src/styles.css">
-<title>Precision Gauge Pro 2.0 · Допуски</title>
+<title>Precision Gauge Pro 2.1 · Допуски</title>
 </head>
 <body>
 <main class="app-shell" id="app-shell">
@@ -38,7 +38,7 @@
  <div class="result-metrics"><div><span>МИНИМУМ</span><output id="min">25,000</output></div><div><span>МАКСИМУМ</span><output id="max">25,050</output></div></div>
  <div class="gauge-heading"><span>ДИАПАЗОН ДОПУСКА</span><span id="gauge-span">ПОЛЕ 0,050 мм</span></div>
  <div class="gauge" id="tolerance-gauge" role="img" aria-label="Диапазон допуска от 25,000 до 25,050 мм; фактический замер не введён">
-  <div class="gauge-track"><span class="gauge-reference-line"></span><span class="center-line"></span><span class="measure-line" id="gauge-marker" hidden></span><span class="gauge-outside gauge-outside-low" id="gauge-low" hidden aria-hidden="true">‹</span><span class="gauge-outside gauge-outside-high" id="gauge-high" hidden aria-hidden="true">›</span></div>
+  <div class="gauge-track"><span class="gauge-safe-zone" aria-hidden="true"></span><span class="gauge-reference-line"></span><span class="center-line"></span><span class="measure-line" id="gauge-marker" hidden></span><span class="gauge-outside gauge-outside-low" id="gauge-low" hidden aria-hidden="true">‹</span><span class="gauge-outside gauge-outside-high" id="gauge-high" hidden aria-hidden="true">›</span></div>
   <div class="gauge-limits"><span id="gauge-min">25,000</span><span class="gauge-center-label">ЦЕЛЬ</span><span id="gauge-max">25,050</span></div>
   <p class="gauge-feedback" id="gauge-feedback" aria-live="polite">Введи фактический замер для контроля</p>
  </div>
@@ -62,7 +62,14 @@
     <p class="batch-error" id="batch-error" role="status" aria-live="polite"></p>
    </section>
    <div class="batch-metrics" aria-label="Результат контроля"><div class="batch-metric"><span>ПРОВЕРЕНО</span><strong id="batch-count">0</strong></div><div class="batch-metric"><span>ГОДНЫХ</span><strong class="positive" id="batch-good">0</strong></div><div class="batch-metric"><span>БРАК</span><strong class="negative" id="batch-bad">0</strong></div></div>
-   <section class="surface batch-trend"><div class="batch-section-head"><strong>ДИНАМИКА ЗАМЕРОВ</strong><span id="batch-yield">—</span></div><svg id="batch-chart" viewBox="0 0 320 96" role="img" aria-label="Пока нет замеров"></svg><div class="batch-trend-summary"><span id="batch-observed-min">Факт MIN —</span><span id="batch-observed-mean">Среднее —</span><span id="batch-observed-max">Факт MAX —</span></div></section>
+   <section class="surface batch-trend"><div class="batch-section-head"><strong>ДИНАМИКА ЗАМЕРОВ</strong><span id="batch-yield">—</span></div>
+    <div class="batch-inspector" id="batch-inspector" aria-live="polite" aria-atomic="true">
+      <div><span id="batch-inspector-label">ПОСЛЕДНИЙ ЗАМЕР</span><strong id="batch-inspector-value">—</strong></div>
+      <span id="batch-inspector-state" class="batch-inspector-state">Нет данных</span>
+    </div>
+    <svg id="batch-chart" viewBox="0 0 320 96" role="group" aria-label="График замеров: коснись точки для просмотра"></svg>
+    <div class="batch-trend-note" id="batch-trend-note">Для тенденции нужно 5 замеров</div>
+    <div class="batch-trend-summary"><span id="batch-observed-min">Факт MIN —</span><span id="batch-observed-mean">Среднее —</span><span id="batch-observed-max">Факт MAX —</span></div></section>
    <section class="surface batch-recent"><div class="batch-section-head"><strong>ПОСЛЕДНИЕ ЗАМЕРЫ</strong><button id="batch-undo" class="batch-link" type="button" disabled>Отменить последний</button></div><div id="batch-readings" class="batch-reading-list"><p class="batch-reading-empty">Измерений ещё нет</p></div></section>
    <div class="batch-bottom-actions"><button class="secondary-button" type="button" id="batch-export" disabled>Экспорт CSV</button><button class="batch-link batch-delete" type="button" id="batch-delete">Удалить партию</button></div>
   </div>
