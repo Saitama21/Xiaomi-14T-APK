@@ -530,3 +530,16 @@ input,select{font-size:16px}
 @media(prefers-reduced-motion:reduce){
  .result-card,.dock-tab,.measure-line{animation:none!important;transition:none!important}
 }
+
+/* Full Pro archive tools are only revealed from the existing engineering-help drawer. */
+.backup-tools{display:grid;gap:10px;margin:14px 0 2px;padding:12px 0 0;border-top:1px solid var(--line-soft)}
+.backup-tools strong{display:block;font-size:12px;font-weight:840;color:var(--ink)}
+.backup-tools small{display:block;margin-top:3px;color:var(--muted);font-size:10px;line-height:1.4}
+.backup-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.backup-actions .secondary-button{min-width:0;min-height:44px;padding:9px 6px;font-size:11px}
+@media(max-width:699px){
+ .engineering-help-content{padding-bottom:13px}
+ .history-mode{max-width:none}
+ .history-view .aux-heading{margin-bottom:9px}
+ .history-batch-card{box-shadow:0 7px 20px #00000017}
+}
