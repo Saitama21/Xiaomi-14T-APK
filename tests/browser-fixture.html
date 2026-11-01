@@ -24,12 +24,13 @@
   if(width===390){const calcBottom=d.querySelector('#view-calc').getBoundingClientRect().bottom;check(calcBottom<=rect.top-2,'Calc overlaps dock at '+width+': calcBottom='+calcBottom+' dockTop='+rect.top);check(d.documentElement.scrollHeight<=height+1,'Calculator unexpectedly scrolls at '+width+': scrollHeight='+d.documentElement.scrollHeight)}
   check(d.querySelector('[data-theme-choice="auto"]'),'System theme button missing at '+width);
   d.querySelector('#tab-settings').click();
-  check(d.querySelector('.settings-version').textContent.trim()==='V 2.2','Version not updated at '+width);
+  check(d.querySelector('.settings-version').textContent.trim()==='V 3.0','Version not updated at '+width);
   const help=d.querySelector('#engineering-help');
   check(help && !help.open,'Engineering help should start collapsed at '+width);
   const helpBounds=help.getBoundingClientRect();
   if(width===390)check(helpBounds.bottom<=rect.top-4,'Settings content obscured by dock at '+width+': helpBottom='+helpBounds.bottom+' dockTop='+rect.top);
   check(d.querySelectorAll('.theme-option svg').length===3,'Theme SVG icons missing at '+width);
+  for(const icon of d.querySelectorAll('.theme-option svg'))check(icon.getBoundingClientRect().width<=21,'Theme icon overflow at '+width);
   help.open=true;
   check(help.open && help.querySelectorAll('p').length===3,'Engineering help cannot expand at '+width);
   w.scrollTo(0,d.documentElement.scrollHeight);
@@ -60,10 +61,23 @@
   measured.value='';measured.dispatchEvent(new w.Event('input',{bubbles:true}));
   check(d.querySelector('#status').textContent.includes('ОЖИДАНИЕ'),'Waiting state broken at '+width);
   check(d.querySelector('#result-card').dataset.state==='empty','Result accent should reset on empty measurement at '+width);
+  d.querySelector('#mode-iso').click();
+  d.querySelector('#nominal').value='12';d.querySelector('#nominal').dispatchEvent(new w.Event('input',{bubbles:true}));
+  d.querySelector('#fit').value='h';d.querySelector('#fit').dispatchEvent(new w.Event('change',{bubbles:true}));
+  d.querySelector('#grade').value='6';d.querySelector('#grade').dispatchEvent(new w.Event('change',{bubbles:true}));
+  measured.value='11,994';measured.dispatchEvent(new w.Event('input',{bubbles:true}));
+  check(d.querySelector('#target').textContent==='11,9945','Half-micrometre midpoint was rounded at '+width);
+  check(d.querySelector('#delta').textContent.includes('-0,0005'),'Exact delta was rounded away at '+width);
+  d.querySelector('#mode-manual').click();
+  d.querySelector('#nominal').value='25,000';d.querySelector('#nominal').dispatchEvent(new w.Event('input',{bubbles:true}));
+  measured.value='';measured.dispatchEvent(new w.Event('input',{bubbles:true}));
   d.querySelector('#save-result').click();
   d.querySelector('#tab-history').click();
+  check(!d.querySelector('#history-panel-batches').hidden,'Batch history should be default at '+width);
+  d.querySelector('#history-mode-calcs').click();
   check(d.querySelector('#history-list .history-entry'),'History not displayed at '+width);
   check(d.querySelector('#history-total').textContent.includes('запис'),'History count missing at '+width);
+  d.querySelector('#history-mode-batches').click();
   d.querySelector('#tab-batch').click();
   check(!d.querySelector('#view-batch').hidden,'Batch screen did not open at '+width);
   d.querySelector('#batch-new').click();
@@ -91,6 +105,14 @@
   d.querySelectorAll('#batch-chart [data-reading-id]')[1].dispatchEvent(new w.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
   check(d.querySelector('#batch-inspector-state').textContent.includes('ВЫШЕ'),'Keyboard selection failed at '+width);
   check(d.querySelector('#batch-inspector-detail').textContent.includes('от цели'),'Delta details missing at '+width);
+  d.querySelector('#tab-history').click();
+  check(d.querySelectorAll('.history-batch-card').length>0,'Saved batch history not shown at '+width);
+  d.querySelector('#history-filter-good').click();
+  check(d.querySelectorAll('.history-batch-card').length===0,'Rejected batch must not be in good-only filter at '+width);
+  d.querySelector('#history-filter-bad').click();
+  check([...d.querySelectorAll('.history-batch-card')].some(card=>card.textContent.includes('UI smoke '+width)),'Reject-only filter did not show the batch at '+width);
+  [...d.querySelectorAll('.history-batch-card')].find(card=>card.textContent.includes('UI smoke '+width)).click();
+  check(!d.querySelector('#view-batch').hidden,'Open saved batch did not navigate at '+width);
   outcomes.push(width+'x'+height+': PASS');
   iframe.remove();
  }

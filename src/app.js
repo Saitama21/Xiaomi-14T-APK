@@ -1,10 +1,12 @@
-import {initBatch,refreshBatch} from './batch.js';
-import {gaugeVisualState} from './inspection.js';
-import {getCalculation,fmt,fmtSigned,formatHalfUnits,DimensionError,precisionOf} from './core.js';
+import {initBatch,refreshBatch,getSavedBatchOverviews,openSavedBatch,exportBatchRecord,restoreBatchesFromBackup} from './batch.js?v=3.0.0';
+import {gaugeVisualState} from './inspection.js?v=3.0.0';
+import {getCalculation,fmt,fmtSigned,formatHalfUnits,DimensionError,precisionOf} from './core.js?v=3.0.0';
+import {exactHalfUnits,signedExactHalfUnits} from './display.js?v=3.0.0';
+import {createBackup,parseBackup} from './backup.js?v=3.0.0';
 const $=id=>document.getElementById(id);
 const KEYS={inputs:'precision-gauge-inputs-v1',history:'precision-gauge-history-v1',theme:'precision-gauge-theme-v1'};
 const defaults={mode:'manual',nominal:'25,000',upper:'+0,050',lower:'0,000',fit:'H',grade:'9',measured:''};
-let state={...defaults},current=null,activePage='calc',historyPage=0,toastTimeout,themePreference='dark';
+let state={...defaults},current=null,activePage='calc',historyPage=0,toastTimeout,themePreference='dark',historyMode='batches',historyFilter='all';
 const PAGE_SIZE=4,MAX_HISTORY=40;
 const memoryStore=new Map();
 const read=(key,fallback)=>{try{const v=JSON.parse(localStorage.getItem(key));return v??memoryStore.get(key)??fallback}catch{return memoryStore.get(key)??fallback}};
@@ -13,7 +15,7 @@ function toast(message){$('toast').textContent=message;$('toast').hidden=false;c
 function restore(){const saved=read(KEYS.inputs,null);if(saved&&typeof saved==='object'){for(const k of Object.keys(defaults))if(typeof saved[k]==='string')state[k]=saved[k]}if(!['manual','iso'].includes(state.mode))state.mode='manual';if(!['H','h'].includes(state.fit))state.fit='H';if(!['5','6','7','8','9','10','11','12'].includes(state.grade))state.grade='9';for(const k of ['nominal','upper','lower','fit','grade','measured'])$(k).value=state[k];const theme=read(KEYS.theme,'dark');applyTheme(['dark','light','auto'].includes(theme)?theme:'dark',false);setMode(state.mode,false)}
 function snapshot(){for(const k of ['nominal','upper','lower','fit','grade','measured'])state[k]=$(k).value;store(KEYS.inputs,state)}
 function setMode(mode,shouldUpdate=true){state.mode=mode;const manual=mode==='manual';$('manual-fields').hidden=!manual;$('iso-fields').hidden=manual;$('iso-note').hidden=manual;for(const [key,pressed] of [['manual',manual],['iso',!manual]]){$('mode-'+key).classList.toggle('is-active',pressed);$('mode-'+key).setAttribute('aria-pressed',String(pressed))}if(shouldUpdate)update()}
-function update(){snapshot();$('clear-measured').hidden=state.measured.trim()==='';try{current=getCalculation(state);const r=current,d=r.decimals;$('calc-error').textContent='';$('target').textContent=formatHalfUnits(r.targetHalfUnits,r.targetPrecision);$('min').textContent=fmt(r.min,d);$('max').textContent=fmt(r.max,d);$('gauge-min').textContent=fmt(r.min,d);$('gauge-max').textContent=fmt(r.max,d);$('save-result').disabled=false;$('copy-result').disabled=false;
+function update(){snapshot();$('clear-measured').hidden=state.measured.trim()==='';try{current=getCalculation(state);const r=current,d=r.decimals;$('calc-error').textContent='';$('target').textContent=exactHalfUnits(r.targetHalfUnits);$('min').textContent=fmt(r.min,d);$('max').textContent=fmt(r.max,d);$('gauge-min').textContent=fmt(r.min,d);$('gauge-max').textContent=fmt(r.max,d);$('save-result').disabled=false;$('copy-result').disabled=false;
  if(state.mode==='iso')$('iso-note').textContent=`ISO ${state.fit}${state.grade} · допуск ${fmt(r.span,d)} мм`;
  const marker=$('gauge-marker'),low=$('gauge-low'),high=$('gauge-high'),gauge=$('tolerance-gauge'),feedback=$('gauge-feedback');
  const status=$('status'),delta=$('delta'),visual=gaugeVisualState(r);status.className='';$('gauge-span').textContent=`ПОЛЕ ${fmt(r.span,d)} мм`;
@@ -32,17 +34,95 @@ function update(){snapshot();$('clear-measured').hidden=state.measured.trim()===
    if(r.nearLimit){status.textContent='⚠ У ГРАНИЦЫ';status.classList.add('status-warning');feedback.textContent=`У границы · запас ${fmt(visual.margin,d)} мм`}
    else{status.textContent='✓ В ДОПУСКЕ';status.classList.add('status-good');feedback.textContent=r.span===0?'Точное совпадение с единственным допустимым размером':`Запас: MIN ${fmt(visual.low,d)} · MAX ${fmt(visual.high,d)} мм`}
   }
-  const doubledDelta=2*r.measured-r.targetHalfUnits;const sign=doubledDelta>0?'+':'';
-  delta.textContent=`${sign}${formatHalfUnits(doubledDelta,r.targetPrecision)} мм от цели`;
+  const doubledDelta=2*r.measured-r.targetHalfUnits;
+  delta.textContent=`${signedExactHalfUnits(doubledDelta)} мм от цели`;
  }
  }catch(error){current=null;$('calc-error').textContent=error instanceof DimensionError?error.message:'Ошибка ввода размера';for(const id of ['target','min','max','gauge-min','gauge-max'])$(id).textContent='—';$('gauge-span').textContent='ПОЛЕ —';$('gauge-marker').hidden=true;$('gauge-low').hidden=true;$('gauge-high').hidden=true;$('gauge-feedback').textContent='Проверь параметры расчёта';$('tolerance-gauge').dataset.state='error';$('result-card').dataset.state='error';$('tolerance-gauge').setAttribute('aria-label','Ошибка в параметрах расчёта');$('status').className='status-bad';$('status').textContent='НЕТ РАСЧЁТА';$('delta').textContent='Проверь значения';$('save-result').disabled=true;$('copy-result').disabled=true}}
-function switchPage(page){activePage=page;document.documentElement.dataset.page=page;for(const key of ['calc','batch','history','settings']){$('view-'+key).hidden=key!==page;$('tab-'+key).classList.toggle('is-active',key===page);if(key===page)$('tab-'+key).setAttribute('aria-current','page');else $('tab-'+key).removeAttribute('aria-current')}if(page==='history')renderHistory();if(page==='batch')refreshBatch()}
+function switchPage(page){activePage=page;document.documentElement.dataset.page=page;for(const key of ['calc','batch','history','settings']){$('view-'+key).hidden=key!==page;$('tab-'+key).classList.toggle('is-active',key===page);if(key===page)$('tab-'+key).setAttribute('aria-current','page');else $('tab-'+key).removeAttribute('aria-current')}if(page==='history')renderHistoryPanel();if(page==='batch')refreshBatch()}
+function renderHistoryPanel(){
+ const batches=historyMode==='batches';
+ $('history-panel-batches').hidden=!batches;
+ $('history-panel-calcs').hidden=batches;
+ for(const key of ['batches','calcs']){
+  const active=historyMode===key;
+  $('history-mode-'+key).classList.toggle('is-active',active);
+  $('history-mode-'+key).setAttribute('aria-pressed',String(active));
+ }
+ if(batches)renderBatchHistory();else renderHistory();
+}
+function renderBatchHistory(){
+ const all=getSavedBatchOverviews();
+ const records=all.filter(b=>historyFilter==='all'||(historyFilter==='good'?b.stats.total>0&&b.stats.bad===0:b.stats.bad>0));
+ const list=$('history-batches');list.replaceChildren();
+ for(const button of document.querySelectorAll('[data-history-filter]')){
+  const active=button.dataset.historyFilter===historyFilter;
+  button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',String(active));
+ }
+ if(!records.length){
+  const empty=document.createElement('p');empty.className='empty';
+  empty.textContent=all.length?'Нет партий с таким результатом':'Пока нет партий — создай первую во вкладке «Партия».';
+  list.append(empty);return;
+ }
+ for(const batch of records){
+  const card=document.createElement('button');card.type='button';card.className='surface history-batch-card';
+  const head=document.createElement('div');head.className='history-batch-head';
+  const title=document.createElement('strong');title.textContent=batch.name;
+  const badge=document.createElement('span');badge.className='history-batch-badge '+(batch.stats.bad?'reject':batch.stats.total?'pass':'pending');
+  badge.textContent=batch.stats.bad?'С БРАКОМ':batch.stats.total?'ГОДНЫЕ':'НОВАЯ';
+  head.append(title,badge);
+  const date=document.createElement('small');date.className='history-batch-date';
+  date.textContent=new Date(batch.createdAt).toLocaleDateString('ru-RU')+' · '+batch.stats.total+' замеров';
+  const metrics=document.createElement('div');metrics.className='history-batch-metrics';
+  for(const [key,value] of [['ГОДНЫЕ',batch.stats.good],['БРАК',batch.stats.bad],['СР. РАЗМЕР',batch.stats.mean===null?'—':exactHalfUnits(batch.stats.mean*2)]]){
+   const cell=document.createElement('span');const label=document.createElement('small');label.textContent=key;
+   const data=document.createElement('strong');data.textContent=value;cell.append(label,data);metrics.append(cell);
+  }
+  card.append(head,date,metrics);
+  card.addEventListener('click',()=>openSavedBatch(batch.id));
+  list.append(card);
+ }
+}
 function historyItems(){const data=read(KEYS.history,[]);return Array.isArray(data)?data.filter(x=>x&&typeof x==='object'&&typeof x.nominal==='string').slice(0,MAX_HISTORY):[]}
 function save(){if(!current)return;const items=historyItems();items.unshift({mode:state.mode,nominal:state.nominal,upper:state.upper,lower:state.lower,fit:state.fit,grade:state.grade,measured:state.measured,timestamp:Date.now()});store(KEYS.history,items.slice(0,MAX_HISTORY));historyPage=0;toast('Расчёт сохранён на устройстве')}
 function loadHistory(item){for(const k of Object.keys(defaults))if(typeof item[k]==='string')state[k]=item[k];for(const k of ['nominal','upper','lower','fit','grade','measured'])$(k).value=state[k];setMode(state.mode);switchPage('calc');toast('Расчёт восстановлен')}
-function renderHistory(){const items=historyItems(),pages=Math.max(1,Math.ceil(items.length/PAGE_SIZE));historyPage=Math.max(0,Math.min(historyPage,pages-1));const list=$('history-list');$('history-total').textContent=`${items.length} ${items.length===1?'запись':items.length%10>=2&&items.length%10<=4&&!(items.length%100>=12&&items.length%100<=14)?'записи':'записей'}`;list.replaceChildren();if(items.length===0){const p=document.createElement('p');p.className='empty';p.textContent='Пока нет сохранённых расчётов. Нажми ☆ на экране расчёта.';list.append(p)}for(const item of items.slice(historyPage*PAGE_SIZE,(historyPage+1)*PAGE_SIZE)){const entry=document.createElement('div');entry.className='history-entry';const info=document.createElement('div');const title=document.createElement('strong');const sub=document.createElement('small');const date=document.createElement('time');date.className='history-date';date.textContent=Number.isFinite(item.timestamp)?new Date(item.timestamp).toLocaleDateString('ru-RU',{day:'2-digit',month:'short',year:'numeric'}):'Локальный расчёт';try{const r=getCalculation(item);title.textContent=`⌀ ${fmt(r.nominal,r.decimals)}${item.mode==='iso'?' '+item.fit+item.grade:''}`;sub.textContent=`${fmt(r.min,r.decimals)} — ${fmt(r.max,r.decimals)} мм · цель ${formatHalfUnits(r.targetHalfUnits,r.targetPrecision)}`}catch{continue}info.append(title,sub,date);const btn=document.createElement('button');btn.type='button';btn.textContent='Открыть';btn.addEventListener('click',()=>loadHistory(item));entry.append(info,btn);list.append(entry)}$('history-page').textContent=`${historyPage+1} / ${pages}`;$('history-prev').disabled=historyPage<=0;$('history-next').disabled=historyPage>=pages-1}
-function report(){const r=current;if(!r)return '';const d=r.decimals;return `⌀ ${fmt(r.nominal,d)} мм${state.mode==='iso'?' '+state.fit+state.grade:''}\nВерхнее отклонение: ${fmtSigned(r.upper,d)} мм\nНижнее отклонение: ${fmtSigned(r.lower,d)} мм\nМинимум: ${fmt(r.min,d)} мм\nМаксимум: ${fmt(r.max,d)} мм\nЦентр допуска: ${formatHalfUnits(r.targetHalfUnits,r.targetPrecision)} мм\nШирина допуска: ${fmt(r.span,d)} мм${r.measured!==null?'\nЗамер: '+fmt(r.measured,d)+' мм — '+(r.inTolerance?'В ДОПУСКЕ':'ВНЕ ДОПУСКА'):''}`}
+function renderHistory(){const items=historyItems(),pages=Math.max(1,Math.ceil(items.length/PAGE_SIZE));historyPage=Math.max(0,Math.min(historyPage,pages-1));const list=$('history-list');$('history-total').textContent=`${items.length} ${items.length===1?'запись':items.length%10>=2&&items.length%10<=4&&!(items.length%100>=12&&items.length%100<=14)?'записи':'записей'}`;list.replaceChildren();if(items.length===0){const p=document.createElement('p');p.className='empty';p.textContent='Пока нет сохранённых расчётов. Нажми ☆ на экране расчёта.';list.append(p)}for(const item of items.slice(historyPage*PAGE_SIZE,(historyPage+1)*PAGE_SIZE)){const entry=document.createElement('div');entry.className='history-entry';const info=document.createElement('div');const title=document.createElement('strong');const sub=document.createElement('small');const date=document.createElement('time');date.className='history-date';date.textContent=Number.isFinite(item.timestamp)?new Date(item.timestamp).toLocaleDateString('ru-RU',{day:'2-digit',month:'short',year:'numeric'}):'Локальный расчёт';try{const r=getCalculation(item);title.textContent=`⌀ ${fmt(r.nominal,r.decimals)}${item.mode==='iso'?' '+item.fit+item.grade:''}`;sub.textContent=`${fmt(r.min,r.decimals)} — ${fmt(r.max,r.decimals)} мм · цель ${exactHalfUnits(r.targetHalfUnits)}`}catch{continue}info.append(title,sub,date);const btn=document.createElement('button');btn.type='button';btn.textContent='Открыть';btn.addEventListener('click',()=>loadHistory(item));entry.append(info,btn);list.append(entry)}$('history-page').textContent=`${historyPage+1} / ${pages}`;$('history-prev').disabled=historyPage<=0;$('history-next').disabled=historyPage>=pages-1}
+function report(){const r=current;if(!r)return '';const d=r.decimals;return `⌀ ${fmt(r.nominal,d)} мм${state.mode==='iso'?' '+state.fit+state.grade:''}\nВерхнее отклонение: ${fmtSigned(r.upper,d)} мм\nНижнее отклонение: ${fmtSigned(r.lower,d)} мм\nМинимум: ${fmt(r.min,d)} мм\nМаксимум: ${fmt(r.max,d)} мм\nЦентр допуска: ${exactHalfUnits(r.targetHalfUnits)} мм\nШирина допуска: ${fmt(r.span,d)} мм${r.measured!==null?'\nЗамер: '+fmt(r.measured,d)+' мм — '+(r.inTolerance?'В ДОПУСКЕ':'ВНЕ ДОПУСКА'):''}`}
 async function copy(){if(!current)return;const text=report();try{await navigator.clipboard.writeText(text);toast('Расчёт скопирован')}catch{const area=document.createElement('textarea');area.value=text;area.style.position='absolute';area.style.left='-9999px';document.body.appendChild(area);area.select();let ok=false;try{ok=document.execCommand('copy')}catch{}area.remove();toast(ok?'Расчёт скопирован':'Не удалось скопировать расчёт')}}
+function downloadBackup(){
+ try{
+  const json=createBackup({inputs:{...state},history:historyItems(),theme:themePreference,
+   batchRecord:exportBatchRecord()});
+  const objectUrl=URL.createObjectURL(new Blob([json],{type:'application/json;charset=utf-8'}));
+  const link=document.createElement('a');link.download='precision-gauge-full-pro-'+new Date().toISOString().slice(0,10)+'.json';
+  link.href=objectUrl;document.body.append(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(objectUrl),30000);
+  toast('Архив подготовлен: сохрани файл в безопасном месте');
+ }catch(error){toast(error.message||'Не удалось создать архив')}
+}
+async function importBackup(file){
+ if(!file)return;
+ try{
+  if(file.size>3_000_000)throw new Error('Файл слишком большой');
+  const data=parseBackup(await file.text());
+  if(!window.confirm('Восстановить архив? Текущие партии, историю и настройки на этом устройстве заменит содержимое архива.'))return;
+  const pairs=[
+   [KEYS.inputs,JSON.stringify(data.inputs)],
+   [KEYS.history,JSON.stringify(data.history)],
+   [KEYS.theme,JSON.stringify(data.theme)],
+   ['precision-gauge-batches-v1',JSON.stringify(data.batches)]
+  ];
+  // Preserve every original value until the entire import is committed.
+  const originals=pairs.map(([key])=>[key,localStorage.getItem(key)]);
+  try{for(const [key,value] of pairs)localStorage.setItem(key,value)}
+  catch(error){
+   for(const [key,previous] of originals){
+    try{if(previous===null)localStorage.removeItem(key);else localStorage.setItem(key,previous)}catch{}
+   }
+   throw new Error('Не удалось сохранить архив. Место на устройстве закончилось');
+  }
+  window.location.reload();
+ }catch(error){toast(error.message||'Не удалось восстановить архив')}
+}
 const systemTheme=window.matchMedia?window.matchMedia('(prefers-color-scheme: light)'):null;
 function applyTheme(preference,persist=true){
  themePreference=preference;
@@ -82,10 +162,18 @@ for(let i=0;i<ENTER_ORDER.length;i++){
 $('upper-sign').addEventListener('click',()=>toggleDeviationSign('upper'));
 $('lower-sign').addEventListener('click',()=>toggleDeviationSign('lower'));
 $('clear-measured').addEventListener('click',clearMeasurement);
-restore();update();initBatch({getCurrent:()=>current,toast});document.documentElement.dataset.page='calc';
+restore();update();initBatch({getCurrent:()=>current,toast,navigate:switchPage});document.documentElement.dataset.page='calc';
 for(const k of ['nominal','upper','lower','fit','grade','measured'])$(k).addEventListener(k==='fit'||k==='grade'?'change':'input',update);
 $('mode-manual').addEventListener('click',()=>setMode('manual'));$('mode-iso').addEventListener('click',()=>setMode('iso'));
 for(const page of ['calc','batch','history','settings'])$('tab-'+page).addEventListener('click',()=>switchPage(page));
+for(const key of ['batches','calcs'])$('history-mode-'+key).addEventListener('click',()=>{historyMode=key;renderHistoryPanel()});
+for(const button of document.querySelectorAll('[data-history-filter]'))button.addEventListener('click',()=>{historyFilter=button.dataset.historyFilter;renderBatchHistory()});
+$('backup-export').addEventListener('click',downloadBackup);
+$('backup-import').addEventListener('click',()=>$('backup-file').click());
+$('backup-file').addEventListener('change',async event=>{
+ const file=event.target.files?.[0];
+ await importBackup(file);event.target.value='';
+});
 $('save-result').addEventListener('click',save);$('copy-result').addEventListener('click',copy);$('theme-toggle').addEventListener('click',toggleTheme);for(const btn of document.querySelectorAll('[data-theme-choice]'))btn.addEventListener('click',()=>applyTheme(btn.dataset.themeChoice));
 $('clear-history').addEventListener('click',()=>{if(historyItems().length===0)return;if(window.confirm('Очистить все сохранённые расчёты на этом устройстве?')){store(KEYS.history,[]);historyPage=0;renderHistory();toast('История очищена')}});
 $('history-prev').addEventListener('click',()=>{historyPage--;renderHistory()});$('history-next').addEventListener('click',()=>{historyPage++;renderHistory()});

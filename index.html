@@ -6,13 +6,13 @@
 <meta name="theme-color" content="#0a1015">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Допуски PRO">
+<meta name="apple-mobile-web-app-title" content="Gauge Pro">
 <meta name="description" content="Precision Gauge Pro — инженерный контроль допусков, измерения партий, ISO 286 и автономный журнал. Offline-first.">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png" sizes="180x180">
-<link rel="stylesheet" href="./src/styles.css">
-<title>Precision Gauge Pro 2.2 · Допуски</title>
+<link rel="stylesheet" href="./src/styles.css?v=3.0.0">
+<title>Precision Gauge Pro 3.0 · Full Pro</title>
 </head>
 <body>
 <main class="app-shell" id="app-shell">
@@ -38,8 +38,8 @@
  <div class="result-metrics"><div><span>МИНИМУМ</span><output id="min">25,000</output></div><div><span>МАКСИМУМ</span><output id="max">25,050</output></div></div>
  <div class="gauge-heading"><span>ДИАПАЗОН ДОПУСКА</span><span id="gauge-span">ПОЛЕ 0,050 мм</span></div>
  <div class="gauge" id="tolerance-gauge" role="img" aria-label="Диапазон допуска от 25,000 до 25,050 мм; фактический замер не введён">
-  <div class="gauge-track"><span class="gauge-safe-zone" aria-hidden="true"></span><span class="gauge-reference-line"></span><span class="center-line"></span><span class="measure-line" id="gauge-marker" hidden></span><span class="gauge-outside gauge-outside-low" id="gauge-low" hidden aria-hidden="true">‹</span><span class="gauge-outside gauge-outside-high" id="gauge-high" hidden aria-hidden="true">›</span></div>
-  <div class="gauge-limits"><span id="gauge-min">25,000</span><span class="gauge-center-label">ЦЕЛЬ</span><span id="gauge-max">25,050</span></div>
+  <div class="gauge-track"><span class="gauge-safe-zone" aria-hidden="true"></span><span class="gauge-reference-line"></span><span class="center-line" aria-hidden="true"></span><span class="measure-line" id="gauge-marker" hidden></span><span class="gauge-outside gauge-outside-low" id="gauge-low" hidden aria-hidden="true">‹</span><span class="gauge-outside gauge-outside-high" id="gauge-high" hidden aria-hidden="true">›</span></div>
+  <div class="gauge-limits"><span id="gauge-min">25,000</span><span class="gauge-center-label">ЦЕЛЬ <span aria-hidden="true">│</span> ФАКТ <span class="gauge-fact-symbol" aria-hidden="true">◆</span></span><span id="gauge-max">25,050</span></div>
   <p class="gauge-feedback" id="gauge-feedback" aria-live="polite">Введи фактический замер для контроля</p>
  </div>
 </section>
@@ -47,7 +47,7 @@
 </div>
 </section>
 <section class="view auxiliary batch-view" id="view-batch" aria-label="Контроль партии" hidden>
-  <div class="batch-heading"><div><small>WORKSPACE / QUALITY CONTROL</small><h1>Контроль партии</h1></div><span class="batch-offline"><span aria-hidden="true">●</span> OFFLINE READY</span></div>
+  <div class="batch-heading"><div><small>WORKSPACE / QUALITY CONTROL</small><h1>Партия</h1></div><span class="batch-offline"><span aria-hidden="true">●</span> OFFLINE READY</span></div>
   <div class="batch-toolbar"><label class="sr-only" for="batch-picker">Выбрать партию</label><select id="batch-picker" aria-label="Сохранённые партии"><option value="">Нет партий</option></select><button id="batch-new" class="secondary-button" type="button">+ Новая</button></div>
   <section class="surface batch-creation" id="batch-creation" hidden aria-label="Новая партия">
    <div><strong>Новая партия из текущего расчёта</strong><small id="batch-calculation-preview">Вернись в «Расчёт» и введи допуск</small></div>
@@ -74,13 +74,32 @@
    <div class="batch-bottom-actions"><button class="secondary-button" type="button" id="batch-export" disabled>Экспорт CSV</button><button class="batch-link batch-delete" type="button" id="batch-delete">Удалить партию</button></div>
   </div>
 </section>
-<section class="view auxiliary" id="view-history" aria-label="Сохранённые размеры" hidden><div class="aux-heading"><div><small>LIBRARY / SAVED MEASUREMENTS</small><h1>История расчётов</h1></div><button class="text-action" id="clear-history" type="button">Очистить</button></div><div class="section-caption"><span id="history-total">0 записей</span><span>Хранятся на этом устройстве</span></div><div class="surface history-list" id="history-list"><p class="empty">Пока нет сохранённых расчётов.</p></div><div class="page-controls"><button class="secondary-button" id="history-prev" type="button">← Назад</button><span id="history-page">1 / 1</span><button class="secondary-button" id="history-next" type="button">Далее →</button></div></section>
+<section class="view auxiliary history-view" id="view-history" aria-label="История измерений" hidden>
+ <div class="aux-heading"><div><small>LIBRARY / MEASUREMENT RECORDS</small><h1>История</h1></div><span class="history-storage-tag"><span>●</span> LOCAL</span></div>
+ <div class="history-mode mode-switch" role="group" aria-label="Раздел истории">
+  <button id="history-mode-batches" class="is-active" type="button" aria-pressed="true">Партии</button>
+  <button id="history-mode-calcs" type="button" aria-pressed="false">Расчёты</button>
+ </div>
+ <div id="history-panel-batches">
+  <div class="history-filter" role="group" aria-label="Фильтр партий">
+   <button id="history-filter-all" class="is-active" data-history-filter="all" aria-pressed="true">Все</button>
+   <button id="history-filter-good" data-history-filter="good" aria-pressed="false">Годные</button>
+   <button id="history-filter-bad" data-history-filter="bad" aria-pressed="false">С браком</button>
+  </div>
+  <div id="history-batches" class="history-batches"><p class="empty">Пока нет партий — создай первую во вкладке «Партия».</p></div>
+ </div>
+ <div id="history-panel-calcs" hidden>
+  <div class="history-calcs-heading"><span id="history-total">0 записей</span><button class="text-action" id="clear-history" type="button">Очистить</button></div>
+  <div class="surface history-list" id="history-list"><p class="empty">Пока нет сохранённых расчётов.</p></div>
+  <div class="page-controls"><button class="secondary-button" id="history-prev" type="button">← Назад</button><span id="history-page">1 / 1</span><button class="secondary-button" id="history-next" type="button">Далее →</button></div>
+ </div>
+</section>
 <section class="view auxiliary settings-view" id="view-settings" aria-label="Параметры" hidden>
-  <div class="aux-heading"><div><small>SYSTEM / PREFERENCES</small><h1>Параметры</h1></div><span class="settings-version">V 2.2</span></div>
+  <div class="aux-heading"><div><small>SYSTEM / PREFERENCES</small><h1>Параметры</h1></div><span class="settings-version">V 3.0</span></div>
   <div class="surface settings-feature">
  <div class="settings-feature-symbol" aria-hidden="true">⌀</div>
  <div class="settings-feature-content"><strong>Precision Gauge Pro</strong><small>ENGINEERING / OFFLINE WORKSPACE</small></div>
- <span class="settings-feature-indicator"><span class="settings-feature-led" aria-hidden="true"></span><span>LOCAL</span></span>
+ <span class="settings-feature-indicator"><span class="settings-feature-led" aria-hidden="true"></span><span>OFFLINE</span></span>
 </div>
   <section class="surface settings-panel" aria-label="Внешний вид">
     <div class="settings-group-title">ИНТЕРФЕЙС</div>
@@ -103,12 +122,17 @@
   <p>Числовые отклонения с чертежа всегда имеют приоритет над справочными полями ISO 286.</p>
   <p>Предупреждение «У границы» — сигнал контроля в пределах 10% поля допуска. Оно не изменяет допустимые размеры.</p>
   <p>Целевой размер — середина поля допуска, а не готовая наладочная уставка станка.</p>
+  <div class="backup-tools">
+   <div><strong>Локальный архив Full Pro</strong><small>Партии, замеры, расчёты и темы — одним JSON-файлом</small></div>
+   <div class="backup-actions"><button type="button" id="backup-export" class="secondary-button">Сохранить архив</button><button type="button" id="backup-import" class="secondary-button">Восстановить</button></div>
+   <input class="sr-only" type="file" id="backup-file" accept=".json,application/json" aria-label="Выбрать архив Precision Gauge Pro">
+  </div>
  </div>
 </details>
 </section>
 </main>
 <nav class="dock" aria-label="Навигация"><button class="dock-tab is-active" id="tab-calc" type="button" data-page="calc" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 2v5m0 10v5M2 12h5m10 0h5"/></svg><span>Расчёт</span></button><button class="dock-tab" id="tab-batch" type="button" data-page="batch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/><path d="M7 5v14m10-14v14" opacity=".45"/></svg><span>Партия</span></button><button class="dock-tab" id="tab-history" type="button" data-page="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>История</span></button><button class="dock-tab" id="tab-settings" type="button" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2.2 2.2m9.6 9.6L19 19M19 5l-2.2 2.2m-9.6 9.6L5 19"/></svg><span>Параметры</span></button></nav>
 <div id="toast" role="status" aria-live="polite" hidden></div>
-<script type="module" src="./src/app.js"></script>
+<script type="module" src="./src/app.js?v=3.0.0"></script>
 </body>
 </html>

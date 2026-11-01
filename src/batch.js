@@ -1,15 +1,16 @@
-import {parseUnits,fmt,formatHalfUnits} from './core.js';
+import {parseUnits,fmt,formatHalfUnits} from './core.js?v=3.0.0';
 import {
  MAX_BATCHES,MAX_READINGS,createBatch,isValidBatch,addReading,
  removeLastReading,batchStats,readingIsGood,batchToCSV
-} from './batch-core.js';
-import {inspectReading,recentTrend} from './inspection.js';
+} from './batch-core.js?v=3.0.0';
+import {inspectReading,recentTrend} from './inspection.js?v=3.0.0';
+import {signedExactHalfUnits} from './display.js?v=3.0.0';
 
 const $=id=>document.getElementById(id);
 const STORAGE_KEY='precision-gauge-batches-v1';
 const SVG='http://www.w3.org/2000/svg';
 let batches=[],selectedId='',creationVisible=false,selectedReadingId='';
-let getCalculation,notify;
+let getCalculation,notify,onNavigate=()=>{};
 
 const currentBatch=()=>batches.find(b=>b.id===selectedId)||null;
 const id=()=>typeof crypto!=='undefined' && crypto.randomUUID
@@ -55,7 +56,7 @@ function renderInspector(batch){
  const result=inspectReading(batch,selected);
  label.textContent=`ЗАМЕР #${position} · ИЗ ${batch.readings.length}`;
  value.textContent=`${fmt(selected.units,6)} мм`;
- detail.textContent=`${result.deltaHalfUnits>0?'+':''}${formatHalfUnits(result.deltaHalfUnits,7)} мм от цели`;
+ detail.textContent=`${signedExactHalfUnits(result.deltaHalfUnits)} мм от цели`;
  state.className='batch-inspector-state '+(result.inTolerance?(result.nearLimit?'edge':'pass'):'reject');
  state.textContent=result.inTolerance?(result.nearLimit?'⚠ У ГРАНИЦЫ':'✓ ГОДЕН'):(result.low<0?'✕ НИЖЕ MIN':'✕ ВЫШЕ MAX');
 }
@@ -218,8 +219,8 @@ function exportCSV(){
  setTimeout(()=>URL.revokeObjectURL(url),30000);
  notify('CSV подготовлен для сохранения');
 }
-export function initBatch({getCurrent,toast}){
- getCalculation=getCurrent;notify=toast;
+export function initBatch({getCurrent,toast,navigate}){
+ getCalculation=getCurrent;notify=toast;onNavigate=navigate||(()=>{});
  load();
  $('batch-new').addEventListener('click',showCreation);
  $('batch-first').addEventListener('click',showCreation);
@@ -252,3 +253,31 @@ export function initBatch({getCurrent,toast}){
  render();
 }
 export function refreshBatch(){render()}
+
+/** History view consumes the same validated, live in-memory batch collection. */
+export function getSavedBatchOverviews(){
+ return batches.slice().reverse().map(batch=>({
+  id:batch.id,name:batch.name,createdAt:batch.createdAt,
+  stats:batchStats(batch),nominal:batch.nominal,min:batch.min,max:batch.max
+ }));
+}
+export function openSavedBatch(batchId){
+ const batch=batches.find(b=>b.id===batchId);
+ if(!batch)return false;
+ if(!commit(batches,batchId))return false;
+ selectedReadingId='';creationVisible=false;render();onNavigate('batch');
+ return true;
+}
+/** Validated restore path, called after backup import. */
+export function restoreBatchesFromBackup(record){
+ if(!record||record.version!==1||!Array.isArray(record.batches)||record.batches.length>MAX_BATCHES||
+    !record.batches.every(isValidBatch))return false;
+ const ids=new Set(record.batches.map(b=>b.id));
+ if(ids.size!==record.batches.length)return false;
+ const nextId=ids.has(record.selectedId)?record.selectedId:(record.batches.at(-1)?.id||'');
+ if(!commit(record.batches,nextId))return false;
+ selectedReadingId='';creationVisible=false;render();return true;
+}
+export function exportBatchRecord(){
+ return {version:1,batches:structuredClone(batches),selectedId};
+}

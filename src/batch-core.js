@@ -1,4 +1,4 @@
-import {fmt,formatHalfUnits} from './core.js';
+import {fmt,formatHalfUnits} from './core.js?v=3.0.0';
 
 export const MAX_BATCHES=20;
 export const MAX_READINGS=500;

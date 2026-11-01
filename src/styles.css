@@ -458,3 +458,88 @@ input,select{font-size:16px}
 @media(prefers-reduced-motion:reduce){
  .result-card,.brand-symbol,.mini-action,.icon-button,.sign-toggle,.theme-option,.dock-tab,.engineering-help-chevron{transition:none}
 }
+
+/* Precision Gauge Pro 3.0 · Full Pro / unified finishing */
+:root{--pro-elevation:0 12px 32px #00000022;--edge-glow:color-mix(in srgb,var(--mint) 27%,var(--line))}
+.brand-symbol{background:linear-gradient(140deg,#a8fce4 0%,#56dab6 72%,#34be9e 100%);box-shadow:0 0 26px #63e2bd24,inset 0 1px #fff8}
+.surface{box-shadow:var(--pro-elevation)}
+.result-card{background:radial-gradient(ellipse at 70% 0%,color-mix(in srgb,var(--mint) 7%,transparent),transparent 60%),var(--surface);border-color:var(--edge-glow)}
+.result-card[data-state="bad"]{background:radial-gradient(ellipse at 75% 0%,color-mix(in srgb,var(--red) 10%,transparent),transparent 62%),var(--surface)}
+.result-card[data-state="warning"]{background:radial-gradient(ellipse at 75% 0%,color-mix(in srgb,var(--amber) 10%,transparent),transparent 62%),var(--surface)}
+.gauge-reference-line{display:none}
+.gauge-track .center-line{top:19px;bottom:auto;height:11px;width:2px;border-radius:2px;background:var(--ink);opacity:.82;z-index:2}
+.gauge-track .measure-line{top:-12px;height:30px;width:3px;background:var(--mint)!important;box-shadow:0 0 0 2px var(--surface),0 0 9px color-mix(in srgb,var(--mint) 37%,transparent);z-index:3}
+.gauge-track .measure-line:before{top:-7px;border-bottom-color:var(--mint)}
+.gauge-center-label{display:flex;align-items:center;gap:5px;justify-content:center;color:var(--muted);font-size:9px;letter-spacing:.04em}
+.gauge-center-label>span{font-size:12px;color:var(--ink);opacity:.75}
+.gauge-center-label .gauge-fact-symbol{font-size:9px;color:var(--mint);opacity:1}
+.gauge-track{background:linear-gradient(90deg,#d9bd69 0%,#41ba9a 14%,#78eac8 50%,#41ba9a 86%,#d9bd69 100%)}
+.target{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.theme-option{min-width:0;overflow:hidden;min-height:49px}
+.theme-option svg,.theme-option>svg{display:block;flex:none;width:20px;height:20px;max-width:20px;max-height:20px;min-width:20px;min-height:20px;vertical-align:middle}
+.theme-option>span{display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.settings-feature-indicator{display:inline-flex;flex:none;align-items:center;gap:7px;border-radius:999px;background:color-mix(in srgb,var(--mint) 9%,var(--surface2));padding:7px 9px;border:1px solid var(--line);font-size:9px}
+.settings-feature-indicator .settings-feature-led{width:7px;height:7px}
+.history-storage-tag{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:9px;padding:7px 9px;font-size:10px;font-weight:800;letter-spacing:.07em;color:var(--muted)}
+.history-storage-tag>span{color:var(--mint)}
+.history-mode{height:45px;margin-bottom:10px}
+.history-filter{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.history-filter button{min-height:41px;border:1px solid var(--line);border-radius:13px;background:var(--surface);color:var(--muted);font-size:12px;font-weight:800}
+.history-filter button.is-active{color:var(--mint);background:color-mix(in srgb,var(--mint) 9%,var(--surface2));border-color:color-mix(in srgb,var(--mint) 36%,var(--line))}
+.history-batches{display:grid;gap:9px}
+.history-batch-card{width:100%;padding:14px 15px;text-align:left;color:var(--ink);cursor:pointer;display:block}
+.history-batch-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.history-batch-head>strong{font-size:15px;font-weight:820;white-space:nowrap;min-width:0;text-overflow:ellipsis;overflow:hidden}
+.history-batch-badge{flex:none;white-space:nowrap;font-size:9px;font-weight:850;letter-spacing:.05em;border-radius:9px;padding:5px 8px;background:var(--surface2)}
+.history-batch-badge.pass{color:var(--mint)}.history-batch-badge.reject{color:var(--red)}.history-batch-badge.pending{color:var(--muted)}
+.history-batch-date{display:block;margin-top:5px;font-size:10px;font-weight:680;color:var(--muted)}
+.history-batch-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px;padding-top:11px;border-top:1px solid var(--line-soft)}
+.history-batch-metrics>span{display:grid;gap:4px;min-width:0;padding-left:10px;border-left:1px solid var(--line-soft)}
+.history-batch-metrics>span:first-child{padding-left:0;border-left:0}
+.history-batch-metrics small{font-size:9px;color:var(--muted);font-weight:820}
+.history-batch-metrics strong{font-size:clamp(13px,4vw,20px);font-weight:840;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.history-batch-metrics>span:nth-child(2) strong{color:var(--red)}
+.history-calcs-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px;color:var(--muted);font-size:12px}
+.history-calcs-heading .text-action{min-height:39px}
+.history-batch-card:active{background:var(--surface2)}
+/* The mobile batch screen follows the approved KPI -> chart -> action hierarchy. */
+@media(max-width:699px){
+ .batch-workspace{display:flex;flex-direction:column;gap:8px}
+ .batch-metrics{order:1}.batch-trend{order:2}.batch-entry-card{order:3}.batch-recent{order:4}.batch-bottom-actions{order:5}
+ .batch-metric{padding:9px 7px 8px}
+ .batch-metric strong{font-size:clamp(23px,6vw,28px)}
+ .batch-trend{padding:10px 12px 9px}
+ .batch-inspector{margin:6px 0 3px}
+ #batch-chart{height:102px}
+ .batch-entry-card{padding:10px 12px}
+ .batch-entry-row .input-shell,.batch-entry-row>button{height:44px;min-height:44px}
+ .batch-bottom-actions{padding-bottom:5px}
+ .history-view{padding-bottom:8px}
+}
+@media(max-height:790px) and (max-width:699px){
+ .batch-recent{display:none}
+ #batch-chart{height:78px}
+ .batch-trend-note{font-size:9px}
+}
+@media(max-width:350px){
+ .history-batch-card{padding:11px}.history-batch-metrics strong{font-size:13px}
+ .history-filter button{font-size:11px}
+ .theme-option{gap:3px;font-size:10px}
+ .theme-option>svg{width:17px;height:17px;min-width:17px;min-height:17px;max-width:17px;max-height:17px}
+}
+@media(prefers-reduced-motion:reduce){
+ .result-card,.dock-tab,.measure-line{animation:none!important;transition:none!important}
+}
+
+/* Full Pro archive tools are only revealed from the existing engineering-help drawer. */
+.backup-tools{display:grid;gap:10px;margin:14px 0 2px;padding:12px 0 0;border-top:1px solid var(--line-soft)}
+.backup-tools strong{display:block;font-size:12px;font-weight:840;color:var(--ink)}
+.backup-tools small{display:block;margin-top:3px;color:var(--muted);font-size:10px;line-height:1.4}
+.backup-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.backup-actions .secondary-button{min-width:0;min-height:44px;padding:9px 6px;font-size:11px}
+@media(max-width:699px){
+ .engineering-help-content{padding-bottom:13px}
+ .history-mode{max-width:none}
+ .history-view .aux-heading{margin-bottom:9px}
+ .history-batch-card{box-shadow:0 7px 20px #00000017}
+}
