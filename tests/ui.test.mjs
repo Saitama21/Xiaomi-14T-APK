@@ -77,7 +77,7 @@ test('premium stays offline-friendly and retains fixed dock source of truth',()=
  assert.doesNotMatch(html,/<script[^>]+https?:\/\//);
  assert.doesNotMatch(css,/@import\s+url\(/);
  assert.match(css,/\.dock\{position:fixed;left:50%;transform:translateX\(-50%\);bottom:2px;width:87%;height:68px;/);
- assert.match(worker,/precision-gauge-v9/);
+ assert.match(worker,/precision-gauge-v10/);
 });
 
 test('2.1 inspector provides accessible SVG chart point controls',()=>{
@@ -92,4 +92,19 @@ test('2.1 inspector provides accessible SVG chart point controls',()=>{
  assert.match(js,/tabindex:'0'/);
  assert.match(js,/inspectReading\(batch,selected\)/);
  assert.match(js,/recentTrend\(batch\)/);
+});
+
+test('WOW polish keeps instrument semantics and settings accessible',()=>{
+ assert.match(html,/id="result-card" data-state="empty"/);
+ assert.match(html,/class="settings-version">V 2\.2</);
+ assert.match(html,/<details class="surface engineering-help" id="engineering-help">/);
+ assert.match(html,/<summary>/);
+ assert.match(html,/data-theme-choice="dark"[^>]+><svg/);
+ assert.match(html,/data-theme-choice="light"[^>]+><svg/);
+ assert.match(app,/\$\('result-card'\)\.dataset\.state=visual\.kind/);
+ assert.match(app,/\$\('result-card'\)\.dataset\.state='error'/);
+ assert.match(css,/\.engineering-help summary\{/);
+ assert.match(css,/\.engineering-help-content\{/);
+ assert.match(css,/\.measure-status strong:before/);
+ assert.doesNotMatch(css,/\.dock\{[^}]+(?:visualViewport|innerHeight|safe-area-inset-bottom)/);
 });

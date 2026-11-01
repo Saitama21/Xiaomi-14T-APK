@@ -12,12 +12,12 @@
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png" sizes="180x180">
 <link rel="stylesheet" href="./src/styles.css">
-<title>Precision Gauge Pro 2.1 · Допуски</title>
+<title>Precision Gauge Pro 2.2 · Допуски</title>
 </head>
 <body>
 <main class="app-shell" id="app-shell">
 <header class="app-header">
-  <div class="brand"><div class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="16" cy="16" r="9"/><circle cx="16" cy="16" r="3"/><path d="M16 1v8m0 14v8M1 16h8m14 0h8"/></svg></div><div class="brand-wordmark"><strong>PRECISION <span>GAUGE</span></strong><small>PRO / ENGINEERING WORKSPACE</small></div></div>
+  <div class="brand"><div class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="16" cy="16" r="9"/><circle cx="16" cy="16" r="3"/><path d="M16 1v8m0 14v8M1 16h8m14 0h8"/></svg></div><div class="brand-wordmark"><strong>PRECISION <span>GAUGE</span></strong><small>PRO <span class="brand-separator">/</span> ENGINEERING WORKSPACE</small></div></div>
   <button class="icon-button" id="theme-toggle" type="button" aria-label="Переключить тему" title="Сменить тему"><svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
 </header>
 <section class="view is-visible" id="view-calc" aria-label="Калькулятор">
@@ -31,7 +31,7 @@
  <p class="iso-note" id="iso-note" hidden>ISO H9 · табличное значение</p>
  <p class="form-error" id="calc-error" aria-live="polite" role="status"></p>
 </section>
-<section class="surface result-card" aria-labelledby="result-heading">
+<section class="surface result-card" id="result-card" data-state="empty" aria-labelledby="result-heading">
  <div class="card-heading result-heading"><h2 id="result-heading"><em>02</em> ЦЕЛЕВОЙ РАЗМЕР</h2><div class="result-actions"><button class="mini-action" id="save-result" type="button" aria-label="Сохранить расчёт" title="Сохранить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 2 3 6.4 7 .9-5 5 .9 7.1L12 18l-5.9 3.4L7 14.3l-5-5 7-.9z"/></svg></button><button class="mini-action" id="copy-result" type="button" aria-label="Копировать расчёт" title="Копировать"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button></div></div>
  <div class="target-row"><span class="target-diameter" aria-hidden="true">⌀</span><output class="target" id="target">25,025</output><span>мм</span></div>
  <div class="target-caption"><span class="target-caption-dot" aria-hidden="true"></span> Середина допуска · ориентир обработки</div>
@@ -76,15 +76,19 @@
 </section>
 <section class="view auxiliary" id="view-history" aria-label="Сохранённые размеры" hidden><div class="aux-heading"><div><small>LIBRARY / SAVED MEASUREMENTS</small><h1>История расчётов</h1></div><button class="text-action" id="clear-history" type="button">Очистить</button></div><div class="section-caption"><span id="history-total">0 записей</span><span>Хранятся на этом устройстве</span></div><div class="surface history-list" id="history-list"><p class="empty">Пока нет сохранённых расчётов.</p></div><div class="page-controls"><button class="secondary-button" id="history-prev" type="button">← Назад</button><span id="history-page">1 / 1</span><button class="secondary-button" id="history-next" type="button">Далее →</button></div></section>
 <section class="view auxiliary settings-view" id="view-settings" aria-label="Параметры" hidden>
-  <div class="aux-heading"><div><small>SYSTEM / PREFERENCES</small><h1>Параметры</h1></div><span class="settings-version">V 2.0</span></div>
-  <div class="surface settings-feature"><div class="settings-feature-symbol" aria-hidden="true">⌀</div><div><strong>Precision Gauge Pro</strong><small>ENGINEERING / OFFLINE WORKSPACE</small></div><span class="settings-feature-led" aria-hidden="true"></span></div>
+  <div class="aux-heading"><div><small>SYSTEM / PREFERENCES</small><h1>Параметры</h1></div><span class="settings-version">V 2.2</span></div>
+  <div class="surface settings-feature">
+ <div class="settings-feature-symbol" aria-hidden="true">⌀</div>
+ <div class="settings-feature-content"><strong>Precision Gauge Pro</strong><small>ENGINEERING / OFFLINE WORKSPACE</small></div>
+ <span class="settings-feature-indicator"><span class="settings-feature-led" aria-hidden="true"></span><span>LOCAL</span></span>
+</div>
   <section class="surface settings-panel" aria-label="Внешний вид">
     <div class="settings-group-title">ИНТЕРФЕЙС</div>
-    <div class="setting-line setting-appearance"><div><strong>Тема оформления</strong><small>Автоматически или вручную</small></div></div>
+    <div class="setting-line setting-appearance"><div><strong>Тема оформления</strong><small>Подстраивается под iPhone или выбирается вручную</small></div></div>
     <div class="theme-options" role="group" aria-label="Выбор темы">
-      <button type="button" class="theme-option" data-theme-choice="auto" aria-pressed="false"><span aria-hidden="true">◐</span> Система</button>
-      <button type="button" class="theme-option" data-theme-choice="dark" aria-pressed="true"><span aria-hidden="true">☾</span> Графит</button>
-      <button type="button" class="theme-option" data-theme-choice="light" aria-pressed="false"><span aria-hidden="true">☀</span> Титан</button>
+      <button type="button" class="theme-option" data-theme-choice="auto" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="3"/><path d="M12 4v14M8 21h8"/></svg><span>Система</span></button>
+      <button type="button" class="theme-option" data-theme-choice="dark" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20.1 16.1A9 9 0 0 1 7.9 3.9 9 9 0 1 0 20.1 16.1Z"/></svg><span>Графит</span></button>
+      <button type="button" class="theme-option" data-theme-choice="light" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.5 1.5m11.2 11.2 1.5 1.5M2 12h2m16 0h2M4.9 19.1l1.5-1.5M17.6 6.4l1.5-1.5"/></svg><span>Титан</span></button>
     </div>
   </section>
   <section class="surface settings-panel" aria-label="Инженерная информация">
@@ -93,7 +97,14 @@
     <div class="setting-line"><div><strong>Стандарт ISO 286</strong><small>H/h · IT5–IT12 · до 500 мм</small></div><span class="setting-state">H / h</span></div>
     <div class="setting-line"><div><strong>Локальные данные</strong><small>Расчёты и партии на устройстве</small></div><span class="setting-state">OFFLINE</span></div>
   </section>
-  <p class="help-copy">Числовые отклонения с чертежа имеют приоритет. Предупреждение «У границы» не меняет поле допуска. Целевой размер — середина поля, а не обязательная наладочная уставка.</p>
+  <details class="surface engineering-help" id="engineering-help">
+ <summary><span class="engineering-help-icon" aria-hidden="true">ⓘ</span><span class="engineering-help-label"><strong>Инженерная справка</strong><small>Как интерпретировать допуски и целевой размер</small></span><span class="engineering-help-chevron" aria-hidden="true">⌄</span></summary>
+ <div class="engineering-help-content">
+  <p>Числовые отклонения с чертежа всегда имеют приоритет над справочными полями ISO 286.</p>
+  <p>Предупреждение «У границы» — сигнал контроля в пределах 10% поля допуска. Оно не изменяет допустимые размеры.</p>
+  <p>Целевой размер — середина поля допуска, а не готовая наладочная уставка станка.</p>
+ </div>
+</details>
 </section>
 </main>
 <nav class="dock" aria-label="Навигация"><button class="dock-tab is-active" id="tab-calc" type="button" data-page="calc" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 2v5m0 10v5M2 12h5m10 0h5"/></svg><span>Расчёт</span></button><button class="dock-tab" id="tab-batch" type="button" data-page="batch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/><path d="M7 5v14m10-14v14" opacity=".45"/></svg><span>Партия</span></button><button class="dock-tab" id="tab-history" type="button" data-page="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>История</span></button><button class="dock-tab" id="tab-settings" type="button" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2.2 2.2m9.6 9.6L19 19M19 5l-2.2 2.2m-9.6 9.6L5 19"/></svg><span>Параметры</span></button></nav>
