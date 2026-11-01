@@ -1,15 +1,22 @@
 {
   "name": "Допуски PRO — инженерный калькулятор",
   "short_name": "Допуски PRO",
+  "description": "Расчёт допусков, предельных размеров, ISO H/h и проверка замеров.",
   "id": "./",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#080d18",
   "theme_color": "#0c1220",
   "lang": "ru",
-  "description": "Расчёт предельных размеров, отклонений и проверки фактического замера",
+  "orientation": "any",
   "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "./icon.svg",
       "sizes": "any",
