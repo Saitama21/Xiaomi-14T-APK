@@ -204,6 +204,7 @@ input,select{font-size:16px}
 .history-entry>div{min-width:0}
 .history-entry strong{display:block;font:810 19px/1.2 var(--font-numeral);letter-spacing:-.03em;color:var(--ink)}
 .history-entry small{display:block;color:var(--muted);font-size:11px;margin-top:6px;line-height:1.35}
+.history-date{display:block;margin-top:7px;font-size:10px;font-weight:720;letter-spacing:.025em;color:var(--mint)}
 .history-entry button{
  min-height:44px;min-width:67px;flex:none;padding:9px 12px;border:1px solid var(--line);
  border-radius:12px;background:var(--surface2);color:var(--mint);font-size:12px;font-weight:800
