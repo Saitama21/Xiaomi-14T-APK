@@ -21,6 +21,32 @@
   check(Math.abs(rect.width-Math.min(width*.87, width>=700?510:640))<=1.5,'Dock width differs at '+width);
   check(Math.abs((rect.left+rect.right)/2-width/2)<=1.5,'Dock not centered at '+width);
   check(d.documentElement.scrollWidth<=width+1,'Horizontal overflow at '+width);
+  check(d.querySelector('[data-theme-choice="auto"]'),'System theme button missing at '+width);
+  d.querySelector('#tab-settings').click();
+  d.querySelector('[data-theme-choice="light"]').click();
+  check(d.documentElement.dataset.theme==='light','Titanium theme did not apply at '+width);
+  d.querySelector('[data-theme-choice="auto"]').click();
+  check(d.querySelector('[data-theme-choice="auto"]').getAttribute('aria-pressed')==='true','System theme selection failed at '+width);
+  d.querySelector('[data-theme-choice="dark"]').click();
+  check(d.documentElement.dataset.theme==='dark','Graphite theme did not apply at '+width);
+  d.querySelector('#tab-calc').click();
+  for(const field of ['nominal','upper','lower','measured']){
+   const el=d.getElementById(field);
+   check(parseFloat(w.getComputedStyle(el).fontSize)>=16,'Small input font '+field+' at '+width);
+  }
+  const measured=d.querySelector('#measured');
+  measured.value='25,051';measured.dispatchEvent(new w.Event('input',{bubbles:true}));
+  check(d.querySelector('#status').textContent.includes('ВЫШЕ'),'Upper limit indicator broken at '+width);
+  measured.value='24,999';measured.dispatchEvent(new w.Event('input',{bubbles:true}));
+  check(d.querySelector('#status').textContent.includes('НИЖЕ'),'Lower limit indicator broken at '+width);
+  measured.value='25,032';measured.dispatchEvent(new w.Event('input',{bubbles:true}));
+  check(d.querySelector('#status').textContent.includes('В ДОПУСКЕ'),'Good state broken at '+width);
+  measured.value='';measured.dispatchEvent(new w.Event('input',{bubbles:true}));
+  check(d.querySelector('#status').textContent.includes('ОЖИДАНИЕ'),'Waiting state broken at '+width);
+  d.querySelector('#save-result').click();
+  d.querySelector('#tab-history').click();
+  check(d.querySelector('#history-list .history-entry'),'History not displayed at '+width);
+  check(d.querySelector('#history-total').textContent.includes('запис'),'History count missing at '+width);
   d.querySelector('#tab-batch').click();
   check(!d.querySelector('#view-batch').hidden,'Batch screen did not open at '+width);
   d.querySelector('#batch-new').click();
