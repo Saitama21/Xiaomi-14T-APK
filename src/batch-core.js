@@ -58,15 +58,15 @@ export function readingIsGood(batch,units){
 export function batchStats(batch){
  if(!isValidBatch(batch))throw new Error('Некорректная партия');
  const total=batch.readings.length;
- let good=0,min=null,max=null,sum=0;
+ let good=0,min=null,max=null,sum=0n;
  for(const {units} of batch.readings){
   if(readingIsGood(batch,units))good++;
   min=min===null?units:Math.min(min,units);
   max=max===null?units:Math.max(max,units);
-  sum+=units;
+  sum+=BigInt(units);
  }
  return {total,good,bad:total-good,min,max,
-  mean:total?Math.round(sum/total):null,
+  mean:total?Number((sum+BigInt(Math.floor(total/2)))/BigInt(total)):null,
   yieldPercent:total?Math.round(1000*good/total)/10:null};
 }
 
