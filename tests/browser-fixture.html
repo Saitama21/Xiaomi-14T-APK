@@ -110,8 +110,8 @@
   d.querySelector('#history-filter-good').click();
   check(d.querySelectorAll('.history-batch-card').length===0,'Rejected batch must not be in good-only filter at '+width);
   d.querySelector('#history-filter-bad').click();
-  check(d.querySelectorAll('.history-batch-card').length===1,'Reject-only filter did not show the batch at '+width);
-  d.querySelector('.history-batch-card').click();
+  check([...d.querySelectorAll('.history-batch-card')].some(card=>card.textContent.includes('UI smoke '+width)),'Reject-only filter did not show the batch at '+width);
+  [...d.querySelectorAll('.history-batch-card')].find(card=>card.textContent.includes('UI smoke '+width)).click();
   check(!d.querySelector('#view-batch').hidden,'Open saved batch did not navigate at '+width);
   outcomes.push(width+'x'+height+': PASS');
   iframe.remove();
