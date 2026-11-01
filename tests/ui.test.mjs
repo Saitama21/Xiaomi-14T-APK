@@ -64,7 +64,7 @@ test('batch workspace integrates without changing dock geometry',()=>{
  }
  assert.match(app,/initBatch\(\{getCurrent:\(\)=>current,toast,navigate:switchPage\}\)/);
  assert.match(css,/\.dock\{position:fixed;left:50%;transform:translateX\(-50%\);bottom:2px;width:87%;height:68px;/);
- for(const path of ['./src/batch.js','./src/batch-core.js'])assert.ok(worker.includes("'"+path+"'"));
+ for(const path of ['./src/batch.js','./src/batch-core.js'])assert.ok(worker.includes("'"+path+"?v='"),'Revisioned batch entry missing '+path);
 });
 
 test('premium theme controls support system, graphite and titanium',()=>{
