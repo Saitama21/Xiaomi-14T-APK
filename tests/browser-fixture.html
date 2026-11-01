@@ -24,6 +24,19 @@
   if(width===390){const calcBottom=d.querySelector('#view-calc').getBoundingClientRect().bottom;check(calcBottom<=rect.top-2,'Calc overlaps dock at '+width+': calcBottom='+calcBottom+' dockTop='+rect.top);check(d.documentElement.scrollHeight<=height+1,'Calculator unexpectedly scrolls at '+width+': scrollHeight='+d.documentElement.scrollHeight)}
   check(d.querySelector('[data-theme-choice="auto"]'),'System theme button missing at '+width);
   d.querySelector('#tab-settings').click();
+  check(d.querySelector('.settings-version').textContent.trim()==='V 2.2','Version not updated at '+width);
+  const help=d.querySelector('#engineering-help');
+  check(help && !help.open,'Engineering help should start collapsed at '+width);
+  const helpBounds=help.getBoundingClientRect();
+  if(width===390)check(helpBounds.bottom<=rect.top-4,'Settings content obscured by dock at '+width+': helpBottom='+helpBounds.bottom+' dockTop='+rect.top);
+  check(d.querySelectorAll('.theme-option svg').length===3,'Theme SVG icons missing at '+width);
+  help.open=true;
+  check(help.open && help.querySelectorAll('p').length===3,'Engineering help cannot expand at '+width);
+  w.scrollTo(0,d.documentElement.scrollHeight);
+  const openedHelp=help.getBoundingClientRect();
+  check(openedHelp.bottom<=rect.top-4,'Expanded help must be readable above dock at '+width+': bottom='+openedHelp.bottom);
+  help.open=false;
+  w.scrollTo(0,0);
   d.querySelector('[data-theme-choice="light"]').click();
   check(d.documentElement.dataset.theme==='light','Titanium theme did not apply at '+width);
   d.querySelector('[data-theme-choice="auto"]').click();
@@ -38,12 +51,15 @@
   const measured=d.querySelector('#measured');
   measured.value='25,051';measured.dispatchEvent(new w.Event('input',{bubbles:true}));
   check(d.querySelector('#status').textContent.includes('ВЫШЕ'),'Upper limit indicator broken at '+width);
+  check(d.querySelector('#result-card').dataset.state==='bad','Result accent not reflecting reject at '+width);
   measured.value='24,999';measured.dispatchEvent(new w.Event('input',{bubbles:true}));
   check(d.querySelector('#status').textContent.includes('НИЖЕ'),'Lower limit indicator broken at '+width);
   measured.value='25,032';measured.dispatchEvent(new w.Event('input',{bubbles:true}));
   check(d.querySelector('#status').textContent.includes('В ДОПУСКЕ'),'Good state broken at '+width);
+  check(d.querySelector('#result-card').dataset.state==='good','Result accent not reflecting good measurement at '+width);
   measured.value='';measured.dispatchEvent(new w.Event('input',{bubbles:true}));
   check(d.querySelector('#status').textContent.includes('ОЖИДАНИЕ'),'Waiting state broken at '+width);
+  check(d.querySelector('#result-card').dataset.state==='empty','Result accent should reset on empty measurement at '+width);
   d.querySelector('#save-result').click();
   d.querySelector('#tab-history').click();
   check(d.querySelector('#history-list .history-entry'),'History not displayed at '+width);
