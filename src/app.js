@@ -1,4 +1,5 @@
 import {initBatch,refreshBatch} from './batch.js';
+import {gaugeVisualState} from './inspection.js';
 import {getCalculation,fmt,fmtSigned,formatHalfUnits,DimensionError,precisionOf} from './core.js';
 const $=id=>document.getElementById(id);
 const KEYS={inputs:'precision-gauge-inputs-v1',history:'precision-gauge-history-v1',theme:'precision-gauge-theme-v1'};
@@ -15,9 +16,9 @@ function setMode(mode,shouldUpdate=true){state.mode=mode;const manual=mode==='ma
 function update(){snapshot();$('clear-measured').hidden=state.measured.trim()==='';try{current=getCalculation(state);const r=current,d=r.decimals;$('calc-error').textContent='';$('target').textContent=formatHalfUnits(r.targetHalfUnits,r.targetPrecision);$('min').textContent=fmt(r.min,d);$('max').textContent=fmt(r.max,d);$('gauge-min').textContent=fmt(r.min,d);$('gauge-max').textContent=fmt(r.max,d);$('save-result').disabled=false;$('copy-result').disabled=false;
  if(state.mode==='iso')$('iso-note').textContent=`ISO ${state.fit}${state.grade} · допуск ${fmt(r.span,d)} мм`;
  const marker=$('gauge-marker'),low=$('gauge-low'),high=$('gauge-high'),gauge=$('tolerance-gauge'),feedback=$('gauge-feedback');
- const status=$('status'),delta=$('delta');status.className='';$('gauge-span').textContent=`ПОЛЕ ${fmt(r.span,d)} мм`;
+ const status=$('status'),delta=$('delta'),visual=gaugeVisualState(r);status.className='';$('gauge-span').textContent=`ПОЛЕ ${fmt(r.span,d)} мм`;
  gauge.setAttribute('aria-label',`Поле допуска от ${fmt(r.min,d)} до ${fmt(r.max,d)} миллиметров. ${r.measured===null?'Замер не введён':`Фактический размер ${fmt(r.measured,d)} миллиметров, ${r.inTolerance?'в допуске':'вне допуска'}`}`);
- low.hidden=true;high.hidden=true;marker.hidden=true;gauge.dataset.state=r.measured===null?'empty':r.inTolerance?(r.nearLimit?'warning':'good'):'bad';
+ low.hidden=true;high.hidden=true;marker.hidden=true;gauge.dataset.state=visual.kind;
  if(r.measured===null){status.textContent='ОЖИДАНИЕ';status.classList.add('status-empty');delta.textContent='Введи замер';feedback.textContent='Введи фактический замер для контроля'}
  else {
   if(!r.inTolerance){
@@ -26,10 +27,10 @@ function update(){snapshot();$('clear-measured').hidden=state.measured.trim()===
    feedback.textContent=below?`Ниже MIN на ${fmt(r.min-r.measured,d)} мм`:`Выше MAX на ${fmt(r.measured-r.max,d)} мм`;
    status.textContent=below?'✕ НИЖЕ МИНИМУМА':'✕ ВЫШЕ МАКСИМУМА';status.classList.add('status-bad');
   }else{
-   marker.hidden=false;marker.style.left=`${Math.max(0,Math.min(100,r.proximity*100))}%`;
+   marker.hidden=false;marker.style.left=`${visual.percent}%`;
    marker.style.background=r.nearLimit?'var(--amber)':'var(--ink)';
-   if(r.nearLimit){status.textContent='⚠ У ГРАНИЦЫ';status.classList.add('status-warning');feedback.textContent='В допуске, но близко к границе'}
-   else{status.textContent='✓ В ДОПУСКЕ';status.classList.add('status-good');feedback.textContent='Фактический размер внутри поля допуска'}
+   if(r.nearLimit){status.textContent='⚠ У ГРАНИЦЫ';status.classList.add('status-warning');feedback.textContent=`У границы · запас ${fmt(visual.margin,d)} мм`}
+   else{status.textContent='✓ В ДОПУСКЕ';status.classList.add('status-good');feedback.textContent=r.span===0?'Точное совпадение с единственным допустимым размером':`Запас: MIN ${fmt(visual.low,d)} · MAX ${fmt(visual.high,d)} мм`}
   }
   const doubledDelta=2*r.measured-r.targetHalfUnits;const sign=doubledDelta>0?'+':'';
   delta.textContent=`${sign}${formatHalfUnits(doubledDelta,r.targetPrecision)} мм от цели`;

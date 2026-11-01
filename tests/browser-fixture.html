@@ -65,6 +65,16 @@
   check(d.querySelector('#batch-bad').textContent==='0','Undo did not work at '+width);
   check(d.querySelector('#batch-count').textContent==='1','Undo did not restore count at '+width);
   check(d.querySelector('#batch-chart').childElementCount>0,'Trend SVG missing at '+width);
+  check(d.querySelector('#batch-inspector-value').textContent.includes('25,025'),'Incorrect last reading detail at '+width);
+  input.value='25,051';d.querySelector('#batch-add').click();
+  check(d.querySelector('#batch-inspector-state').textContent.includes('ВЫШЕ'),'Inspector did not flag out-of-range reading at '+width);
+  const points=d.querySelectorAll('#batch-chart [data-reading-id]');
+  check(points.length===2,'Expected two selectable chart points at '+width);
+  points[0].querySelector('circle:last-child').dispatchEvent(new w.MouseEvent('click',{bubbles:true}));
+  check(d.querySelector('#batch-inspector-value').textContent.includes('25,025'),'Touch point selection failed at '+width);
+  d.querySelectorAll('#batch-chart [data-reading-id]')[1].dispatchEvent(new w.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
+  check(d.querySelector('#batch-inspector-state').textContent.includes('ВЫШЕ'),'Keyboard selection failed at '+width);
+  check(d.querySelector('#batch-inspector-detail').textContent.includes('от цели'),'Delta details missing at '+width);
   outcomes.push(width+'x'+height+': PASS');
   iframe.remove();
  }

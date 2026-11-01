@@ -77,5 +77,19 @@ test('premium stays offline-friendly and retains fixed dock source of truth',()=
  assert.doesNotMatch(html,/<script[^>]+https?:\/\//);
  assert.doesNotMatch(css,/@import\s+url\(/);
  assert.match(css,/\.dock\{position:fixed;left:50%;transform:translateX\(-50%\);bottom:2px;width:87%;height:68px;/);
- assert.match(worker,/precision-gauge-v8/);
+ assert.match(worker,/precision-gauge-v9/);
+});
+
+test('2.1 inspector provides accessible SVG chart point controls',()=>{
+ assert.match(html,/id="batch-inspector"/);
+ assert.match(html,/id="batch-inspector-value"/);
+ assert.match(html,/id="batch-inspector-detail"/);
+ assert.match(html,/id="batch-trend-note"/);
+ assert.match(html,/class="gauge-safe-zone"/);
+ assert.match(worker,/\.\/src\/inspection\.js/);
+ const js=readFileSync(new URL('../src/batch.js',import.meta.url),'utf8');
+ assert.match(js,/data-reading-id/);
+ assert.match(js,/tabindex:'0'/);
+ assert.match(js,/inspectReading\(batch,selected\)/);
+ assert.match(js,/recentTrend\(batch\)/);
 });

@@ -3,11 +3,12 @@ import {
  MAX_BATCHES,MAX_READINGS,createBatch,isValidBatch,addReading,
  removeLastReading,batchStats,readingIsGood,batchToCSV
 } from './batch-core.js';
+import {inspectReading,recentTrend} from './inspection.js';
 
 const $=id=>document.getElementById(id);
 const STORAGE_KEY='precision-gauge-batches-v1';
 const SVG='http://www.w3.org/2000/svg';
-let batches=[],selectedId='',creationVisible=false;
+let batches=[],selectedId='',creationVisible=false,selectedReadingId='';
 let getCalculation,notify;
 
 const currentBatch=()=>batches.find(b=>b.id===selectedId)||null;
@@ -39,6 +40,29 @@ function svg(tag,attributes={}){
  const element=document.createElementNS(SVG,tag);
  for(const [key,value] of Object.entries(attributes))element.setAttribute(key,String(value));
  return element;
+}
+function renderInspector(batch){
+ const selected=batch.readings.find(r=>r.id===selectedReadingId)||batch.readings.at(-1);
+ const label=$('batch-inspector-label'),value=$('batch-inspector-value'),detail=$('batch-inspector-detail'),state=$('batch-inspector-state');
+ $('batch-trend-note').textContent=recentTrend(batch).message;
+ if(!selected){
+  selectedReadingId='';label.textContent='ПОСЛЕДНИЙ ЗАМЕР';value.textContent='—';
+  detail.textContent='Коснись точки графика';state.textContent='Нет данных';state.className='batch-inspector-state';
+  return;
+ }
+ selectedReadingId=selected.id;
+ const position=batch.readings.indexOf(selected)+1;
+ const result=inspectReading(batch,selected);
+ label.textContent=`ЗАМЕР #${position} · ИЗ ${batch.readings.length}`;
+ value.textContent=`${fmt(selected.units,6)} мм`;
+ detail.textContent=`${result.deltaHalfUnits>0?'+':''}${formatHalfUnits(result.deltaHalfUnits,7)} мм от цели`;
+ state.className='batch-inspector-state '+(result.inTolerance?(result.nearLimit?'edge':'pass'):'reject');
+ state.textContent=result.inTolerance?(result.nearLimit?'⚠ У ГРАНИЦЫ':'✓ ГОДЕН'):(result.low<0?'✕ НИЖЕ MIN':'✕ ВЫШЕ MAX');
+}
+function selectReading(batch,readingId){
+ if(!batch.readings.some(r=>r.id===readingId))return;
+ selectedReadingId=readingId;
+ renderInspector(batch);drawChart(batch);
 }
 function drawChart(batch){
  const chart=$('batch-chart');
@@ -72,11 +96,19 @@ function drawChart(batch){
    fill:'none',stroke:'var(--ink)','stroke-width':1.65,'stroke-linejoin':'round','stroke-linecap':'round'}));
  }
  for(let i=0;i<points.length;i++){
-  const good=readingIsGood(batch,subset[i].units);
-  chart.append(svg('circle',{cx:points[i][0],cy:points[i][1],r:good?3.5:4.5,
-   fill:good?'var(--mint)':'var(--red)',stroke:'var(--surface)','stroke-width':1.5}));
+  const reading=subset[i],good=readingIsGood(batch,reading.units);
+  const selected=reading.id===selectedReadingId;
+  const group=svg('g',{'class':'batch-chart-point'+(selected?' selected':''),
+   'data-reading-id':reading.id,role:'button',tabindex:'0',
+   'aria-label':`Замер №${batch.readings.length-subset.length+i+1}: ${fmt(reading.units,6)} мм, ${good?'годен':'брак'}`});
+  const halo=svg('circle',{cx:points[i][0],cy:points[i][1],r:selected?8:6.5,
+   fill:'none',stroke:selected?'var(--ink)':'transparent','stroke-width':1.5,'pointer-events':'none'});
+  const dot=svg('circle',{cx:points[i][0],cy:points[i][1],r:selected?4.5:good?3.5:4,
+   fill:good?'var(--mint)':'var(--red)',stroke:'var(--surface)','stroke-width':1.5,'pointer-events':'none'});
+  const hit=svg('circle',{cx:points[i][0],cy:points[i][1],r:12,fill:'transparent'});
+  group.append(halo,dot,hit);chart.append(group);
  }
- chart.setAttribute('aria-label',`График последних ${subset.length} измерений; точность отображения относительно MIN и MAX`);
+ chart.setAttribute('aria-label',`Последние ${subset.length} измерений; выбери точку для просмотра размера и статуса`);
 }
 function renderRecent(batch){
  const list=$('batch-readings');list.replaceChildren();
@@ -118,7 +150,7 @@ function render(){
   :'Нужен корректный размер на вкладке «Расчёт»';
  $('batch-create').disabled=!calc || batches.length>=MAX_BATCHES;
  $('batch-new').disabled=batches.length>=MAX_BATCHES && !creationVisible;
- if(!batch)return;
+ if(!batch){selectedReadingId='';$('batch-trend-note').textContent='Для тенденции нужно 5 замеров';return}
  text($('batch-nominal'),mm(batch.nominal));
  text($('batch-min'),mm(batch.min));
  text($('batch-max'),mm(batch.max));
@@ -132,7 +164,7 @@ function render(){
  $('batch-undo').disabled=stats.total===0;
  $('batch-export').disabled=stats.total===0;
  $('batch-error').textContent=stats.total>=MAX_READINGS?'Партия заполнена. Экспортируй CSV или создай новую.':'';
- drawChart(batch);renderRecent(batch);
+ renderInspector(batch);drawChart(batch);renderRecent(batch);
 }
 function showCreation(){
  creationVisible=!creationVisible;
@@ -147,7 +179,7 @@ function startBatch(){
  const name=$('batch-name').value.trim()||`Партия ${String(batches.length+1).padStart(2,'0')} · ⌀${mm(calc.nominal)}`;
  const next=createBatch(calc,{id:id(),name});
  if(!commit([...batches,next],next.id))return;
- creationVisible=false;$('batch-measurement').value='';render();
+ creationVisible=false;selectedReadingId='';$('batch-measurement').value='';render();
  notify('Партия создана · допуск зафиксирован');$('batch-measurement').focus();
 }
 function record(){
@@ -159,7 +191,7 @@ function record(){
  try{
   const next=addReading(batch,units,{id:id()});
   if(!commit(batches.map(b=>b.id===next.id?next:b),selectedId))return;
-  field.value='';render();notify(readingIsGood(batch,units)?'✓ Замер в допуске':'✕ Замер вне допуска');
+  field.value='';selectedReadingId=next.readings.at(-1).id;render();notify(readingIsGood(batch,units)?'✓ Замер в допуске':'✕ Замер вне допуска');
   field.focus();
  }catch(error){$('batch-error').textContent=error.message}
 }
@@ -167,14 +199,14 @@ function undo(){
  const batch=currentBatch();if(!batch?.readings.length)return;
  const next=removeLastReading(batch);
  if(commit(batches.map(b=>b.id===batch.id?next:b),selectedId)){
-  render();notify('Последний замер удалён');
+  if(selectedReadingId===batch.readings.at(-1).id)selectedReadingId='';render();notify('Последний замер удалён');
  }
 }
 function deleteBatch(){
  const batch=currentBatch();if(!batch)return;
  if(!confirm(`Удалить «${batch.name}» и все ${batch.readings.length} замеров? Это нельзя отменить.`))return;
  const others=batches.filter(b=>b.id!==batch.id);
- if(commit(others,others.at(-1)?.id||'')){render();notify('Партия удалена')}
+ if(commit(others,others.at(-1)?.id||'')){selectedReadingId='';render();notify('Партия удалена')}
 }
 function exportCSV(){
  const batch=currentBatch();if(!batch)return;
@@ -194,11 +226,26 @@ export function initBatch({getCurrent,toast}){
  $('batch-create').addEventListener('click',startBatch);
  $('batch-name').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();startBatch()}});
  $('batch-picker').addEventListener('change',e=>{
-  if(commit(batches,e.target.value)){$('batch-measurement').value='';render()}
+  if(commit(batches,e.target.value)){selectedReadingId='';$('batch-measurement').value='';render()}
  });
  $('batch-add').addEventListener('click',record);
  $('batch-measurement').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();record()}});
  $('batch-measurement').addEventListener('input',()=>{$('batch-error').textContent=''});
+ $('batch-chart').addEventListener('click',event=>{
+  const node=event.target.closest?.('[data-reading-id]');
+  if(node)selectReading(currentBatch(),node.dataset.readingId);
+ });
+ $('batch-chart').addEventListener('keydown',event=>{
+  if(event.key!=='Enter'&&event.key!==' ')return;
+  const node=event.target.closest?.('[data-reading-id]');
+  if(!node)return;
+  event.preventDefault();
+  const id=node.dataset.readingId;
+  selectReading(currentBatch(),id);
+  $('batch-chart').querySelectorAll('[data-reading-id]').forEach(point=>{
+   if(point.dataset.readingId===id)point.focus();
+  });
+ });
  $('batch-undo').addEventListener('click',undo);
  $('batch-delete').addEventListener('click',deleteBatch);
  $('batch-export').addEventListener('click',exportCSV);

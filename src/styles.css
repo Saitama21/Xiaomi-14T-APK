@@ -380,3 +380,36 @@ input,select{font-size:16px}
 @media(prefers-reduced-motion:reduce){
  *,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
+
+/* 2.1 · precise gauge zones and point inspector */
+.gauge-safe-zone{position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;
+ background:linear-gradient(90deg,color-mix(in srgb,var(--amber) 46%,transparent) 0 10%,transparent 10% 90%,color-mix(in srgb,var(--amber) 46%,transparent) 90% 100%)}
+.gauge-track .measure-line{z-index:3}
+.gauge-track .center-line{z-index:2}
+.batch-inspector{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0 3px;
+ padding:9px 11px;border:1px solid var(--line-soft);background:var(--surface2);border-radius:12px}
+.batch-inspector>div{min-width:0;flex:1}
+.batch-inspector #batch-inspector-label{display:block;color:var(--muted);font-size:9px;font-weight:850;letter-spacing:.075em}
+.batch-inspector #batch-inspector-value{display:block;line-height:1.25;color:var(--ink);font-size:clamp(15px,4vw,19px);font-weight:850;letter-spacing:-.03em}
+.batch-inspector #batch-inspector-detail{display:block;color:var(--muted);font-size:10px;font-weight:660;margin-top:2px}
+.batch-inspector-state{display:block;flex:none;max-width:116px;text-align:right;color:var(--muted);font-size:10px;font-weight:840}
+.batch-inspector-state.pass{color:var(--mint)}.batch-inspector-state.edge{color:var(--amber)}.batch-inspector-state.reject{color:var(--red)}
+.batch-trend-note{font-size:10px;color:var(--muted);font-weight:650;margin:0 0 7px;padding-left:2px;line-height:1.4}
+.batch-chart-point{cursor:pointer;outline:none}
+.batch-chart-point circle{transition:r .16s var(--ease-ui),stroke .16s var(--ease-ui)}
+.batch-chart-point:focus-visible circle:first-child{stroke:var(--blue);stroke-width:2.5}
+.batch-chart-point:hover circle:first-child{stroke:var(--ink);stroke-width:2}
+.batch-chart-point.selected{filter:drop-shadow(0 0 3px color-mix(in srgb,var(--mint) 35%,transparent))}
+@media(max-width:699px){
+ .batch-inspector{padding:7px 9px;margin:6px 0 2px}
+ #batch-chart{height:85px;margin-top:3px}
+ .batch-recent .batch-reading:nth-child(n+3){display:none}
+}
+@media(max-height:780px) and (max-width:699px){
+ .batch-inspector{padding:5px 8px;margin:4px 0 1px}
+ #batch-chart{height:59px}
+ .batch-trend-note{font-size:9px;margin-bottom:3px}
+ .batch-inspector #batch-inspector-value{font-size:15px}
+ .batch-inspector #batch-inspector-detail{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){.batch-chart-point circle{transition:none}}
