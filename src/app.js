@@ -43,7 +43,7 @@ function report(){const r=current;if(!r)return '';const d=r.decimals;return `⌀
 async function copy(){if(!current)return;const text=report();try{await navigator.clipboard.writeText(text);toast('Расчёт скопирован')}catch{const area=document.createElement('textarea');area.value=text;area.style.position='absolute';area.style.left='-9999px';document.body.appendChild(area);area.select();let ok=false;try{ok=document.execCommand('copy')}catch{}area.remove();toast(ok?'Расчёт скопирован':'Не удалось скопировать расчёт')}}
 function toggleTheme(){const next=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=next;document.querySelector('meta[name=theme-color]').content=next==='light'?'#f0f4f8':'#090f1a';store(KEYS.theme,next)}
 function toggleDeviationSign(id){
- const input=$(id),value=input.value.trim().replace(/[−–—]/g,'-');
+ const input=$(id),value=input.value.trim().replace(/\s/g,'').replace(/[−–—]/g,'-');
  if(!value){input.value='-0'}else if(value.startsWith('-')){input.value='+'+value.slice(1)}else{input.value='-'+value.replace(/^\+/,'')}
  update();input.focus();
 }
@@ -52,8 +52,8 @@ const ENTER_ORDER=['nominal','upper','lower','measured'];
 for(let i=0;i<ENTER_ORDER.length;i++){
  $(ENTER_ORDER[i]).addEventListener('keydown',event=>{
   if(event.key!=='Enter')return;
-  event.preventDefault();const next=$(ENTER_ORDER[i+1]);
-  if(next && !next.closest('[hidden]')){next.focus();next.select()}else{$(ENTER_ORDER[i]).blur()}
+  event.preventDefault();const next=ENTER_ORDER.slice(i+1).map($).find(input=>!input.closest('[hidden]'));
+  if(next){next.focus();next.select()}else{$(ENTER_ORDER[i]).blur()}
  });
 }
 $('upper-sign').addEventListener('click',()=>toggleDeviationSign('upper'));
