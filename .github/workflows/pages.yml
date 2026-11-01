@@ -1,7 +1,9 @@
 name: Verify and publish Precision Gauge
 on:
   push:
-    branches: ['**']\n  pull_request:\n    branches: [main]
+    branches: ['**']
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -20,6 +22,7 @@ jobs:
           node-version: '22'
       - run: npm run check
   deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: verify
     runs-on: ubuntu-latest
     environment:
