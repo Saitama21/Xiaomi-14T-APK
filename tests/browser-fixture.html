@@ -24,7 +24,7 @@
   if(width===390){const calcBottom=d.querySelector('#view-calc').getBoundingClientRect().bottom;check(calcBottom<=rect.top-2,'Calc overlaps dock at '+width+': calcBottom='+calcBottom+' dockTop='+rect.top);check(d.documentElement.scrollHeight<=height+1,'Calculator unexpectedly scrolls at '+width+': scrollHeight='+d.documentElement.scrollHeight)}
   check(d.querySelector('[data-theme-choice="auto"]'),'System theme button missing at '+width);
   d.querySelector('#tab-settings').click();
-  check(d.querySelector('.settings-version').textContent.trim()==='V 2.2','Version not updated at '+width);
+  check(d.querySelector('.settings-version').textContent.trim()==='V 3.0','Version not updated at '+width);
   const help=d.querySelector('#engineering-help');
   check(help && !help.open,'Engineering help should start collapsed at '+width);
   const helpBounds=help.getBoundingClientRect();
