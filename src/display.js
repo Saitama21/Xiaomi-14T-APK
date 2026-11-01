@@ -1,4 +1,4 @@
-import {formatHalfUnits,fmt} from './core.js';
+import {formatHalfUnits,fmt} from './core.js?v=3.0.0';
 
 /** Exact presentation of doubled integer micrometre units, never rounds away a nonzero deviation. */
 export function exactHalfUnits(halfUnits,minimumDigits=3){
