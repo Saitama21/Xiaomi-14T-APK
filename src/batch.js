@@ -15,7 +15,7 @@ const id=()=>typeof crypto!=='undefined' && crypto.randomUUID
  ? crypto.randomUUID()
  : Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
 const text=(element,value)=>{element.textContent=String(value)};
-const mm=units=>fmt(units,3);
+const mm=units=>fmt(units,6).replace(/(,\\d{3})0+$/,'$1');
 
 function load(){
  try{
