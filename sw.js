@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='precision-gauge-v7';
+const CACHE='precision-gauge-v8';
 const PREFIX='precision-gauge-';
 const FILES=['./','./index.html','./src/styles.css','./src/app.js','./src/core.js','./src/batch.js','./src/batch-core.js','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
 self.addEventListener('install',event=>{
