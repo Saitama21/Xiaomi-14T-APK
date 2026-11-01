@@ -72,7 +72,7 @@
   check(points.length===2,'Expected two selectable chart points at '+width);
   points[0].querySelector('circle:last-child').dispatchEvent(new w.MouseEvent('click',{bubbles:true}));
   check(d.querySelector('#batch-inspector-value').textContent.includes('25,025'),'Touch point selection failed at '+width);
-  points[1].dispatchEvent(new w.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
+  d.querySelectorAll('#batch-chart [data-reading-id]')[1].dispatchEvent(new w.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
   check(d.querySelector('#batch-inspector-state').textContent.includes('ВЫШЕ'),'Keyboard selection failed at '+width);
   check(d.querySelector('#batch-inspector-detail').textContent.includes('от цели'),'Delta details missing at '+width);
   outcomes.push(width+'x'+height+': PASS');
