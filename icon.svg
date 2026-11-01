@@ -1,7 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Допуски PRO">
-<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#172941"/><stop offset="1" stop-color="#080d18"/></linearGradient><linearGradient id="ink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#80f2da"/><stop offset="1" stop-color="#79acff"/></linearGradient></defs>
-<rect width="512" height="512" rx="112" fill="url(#bg)"/>
-<rect x="26" y="26" width="460" height="460" rx="92" fill="none" stroke="#ffffff" stroke-opacity=".1" stroke-width="3"/>
-<circle cx="256" cy="256" r="132" fill="none" stroke="url(#ink)" stroke-width="38"/>
-<path d="M132 382 380 130" fill="none" stroke="url(#ink)" stroke-width="34" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Допуски PRO">
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#1b3044"/><stop offset="1" stop-color="#090f1a"/></linearGradient><linearGradient id="ink" x2="1" y2="1"><stop stop-color="#89f0d1"/><stop offset="1" stop-color="#80b4ff"/></linearGradient></defs>
+<rect width="512" height="512" rx="115" fill="url(#bg)"/>
+<circle cx="256" cy="256" r="131" stroke="url(#ink)" stroke-width="39" fill="none"/>
+<path d="M126 386 386 126" stroke="url(#ink)" stroke-linecap="round" stroke-width="37"/>
 </svg>
