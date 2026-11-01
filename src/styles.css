@@ -320,6 +320,27 @@ input,select{font-size:16px}
  .batch-metric span{font-size:9px}
  .batch-trend-summary{font-size:9px}
 }
+@media(max-height:900px) and (max-width:699px){
+ .app-shell{padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:calc(90px + env(safe-area-inset-bottom))}
+ .app-header{height:44px;margin-bottom:10px}
+ .brand-symbol{width:41px;height:41px}.brand-symbol svg{width:25px;height:25px}
+ .mode-switch{height:42px;margin-bottom:9px}
+ .input-card,.result-card{padding-top:12px;padding-bottom:11px}
+ .card-heading{margin-bottom:7px}
+ .field label{margin-bottom:5px}
+ .nominal-shell{height:47px}
+ .input-shell{height:42px}
+ .field-pair{margin-top:8px}
+ .result-heading{margin-bottom:0}
+ .mini-action{width:40px;height:40px}
+ .result-metrics{margin-top:10px}
+ .result-metrics>div{padding:8px 11px 7px}
+ .gauge-heading{margin-top:10px;margin-bottom:11px}
+ .gauge-limits{margin-top:17px}
+ .gauge-feedback{margin-top:5px}
+ .measure-card{padding-top:10px;padding-bottom:10px}
+ .measure-shell{height:39px}
+}
 @media(max-height:780px) and (max-width:699px){
  .app-shell{padding-top:calc(9px + env(safe-area-inset-top))}
  .app-header{height:43px;margin-bottom:8px}
