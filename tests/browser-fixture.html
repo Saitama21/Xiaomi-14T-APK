@@ -18,9 +18,10 @@
   const dock=d.querySelector('.dock'),rect=dock.getBoundingClientRect();
   check(w.getComputedStyle(dock).position==='fixed','Dock not fixed at '+width);
   check(Math.abs(rect.bottom-(height-2))<=1.5,'Dock bottom differs at '+width+': '+rect.bottom);
-  check(Math.abs(rect.width-Math.min(width*.87, width>=700?510:640))<=1.5,'Dock width differs at '+width);
-  check(Math.abs((rect.left+rect.right)/2-width/2)<=1.5,'Dock not centered at '+width);
+  check(Math.abs(rect.width-Math.min(d.documentElement.clientWidth*.87, width>=700?510:640))<=1.5,'Dock width differs at '+width+' actual='+rect.width+' clientWidth='+d.documentElement.clientWidth);
+  check(Math.abs((rect.left+rect.right)/2-d.documentElement.clientWidth/2)<=1.5,'Dock not centered at '+width);
   check(d.documentElement.scrollWidth<=width+1,'Horizontal overflow at '+width);
+  if(width===390){const calcBottom=d.querySelector('#view-calc').getBoundingClientRect().bottom;check(calcBottom<=rect.top-2,'Calc overlaps dock at '+width+': calcBottom='+calcBottom+' dockTop='+rect.top)}
   check(d.querySelector('[data-theme-choice="auto"]'),'System theme button missing at '+width);
   d.querySelector('#tab-settings').click();
   d.querySelector('[data-theme-choice="light"]').click();
