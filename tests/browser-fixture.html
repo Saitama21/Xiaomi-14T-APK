@@ -21,7 +21,7 @@
   check(Math.abs(rect.width-Math.min(d.documentElement.clientWidth*.87, width>=700?510:640))<=1.5,'Dock width differs at '+width+' actual='+rect.width+' clientWidth='+d.documentElement.clientWidth);
   check(Math.abs((rect.left+rect.right)/2-d.documentElement.clientWidth/2)<=1.5,'Dock not centered at '+width);
   check(d.documentElement.scrollWidth<=width+1,'Horizontal overflow at '+width);
-  if(width===390){const calcBottom=d.querySelector('#view-calc').getBoundingClientRect().bottom;check(calcBottom<=rect.top-2,'Calc overlaps dock at '+width+': calcBottom='+calcBottom+' dockTop='+rect.top)}
+  if(width===390){const calcBottom=d.querySelector('#view-calc').getBoundingClientRect().bottom;check(calcBottom<=rect.top-2,'Calc overlaps dock at '+width+': calcBottom='+calcBottom+' dockTop='+rect.top);check(d.documentElement.scrollHeight<=height+1,'Calculator unexpectedly scrolls at '+width+': scrollHeight='+d.documentElement.scrollHeight)}
   check(d.querySelector('[data-theme-choice="auto"]'),'System theme button missing at '+width);
   d.querySelector('#tab-settings').click();
   d.querySelector('[data-theme-choice="light"]').click();
