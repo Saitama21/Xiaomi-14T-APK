@@ -36,6 +36,6 @@
 .gauge[data-state="warning"] .gauge-feedback{color:var(--amber)}
 .gauge[data-state="good"] .gauge-feedback{color:var(--mint)}
 @keyframes gauge-pulse{from{opacity:.65;transform:scale(.92)}to{opacity:1;transform:scale(1.08)}}
-@media(max-width:400px){.deviation-shell{gap:4px;padding-right:6px}.sign-toggle{width:28px;height:30px;font-size:17px}.gauge-feedback{font-size:9px}}
+@media(max-width:400px){.deviation-shell{gap:4px;padding-right:6px}.sign-toggle{width:28px;height:30px;font-size:17px}.gauge-feedback{font-size:9px}.measure-card{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.measure-shell{width:100%;padding-inline:7px}.measure-status strong{font-size:10px;white-space:normal;line-height:1.15}}
 @media(max-height:740px) and (max-width:699px){.gauge-feedback{margin-top:2px;min-height:11px;font-size:9px}}
 @media(prefers-reduced-motion:reduce){.gauge-outside{animation:none}}
