@@ -44,11 +44,15 @@ test('small phones and reduced-motion settings are supported',()=>{
  assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
 });
 
-test('offline installation caches all application entrypoints',()=>{
- for(const path of ['./index.html','./src/styles.css','./src/app.js','./src/core.js','./manifest.webmanifest']){
-  assert.ok(worker.includes(`'${path}'`),`Missing offline asset ${path}`);
+test('offline install caches a complete revisioned dependency graph',()=>{
+ for(const path of ['styles.css','app.js','core.js','batch.js','batch-core.js','inspection.js','display.js','backup.js']){
+  assert.ok(worker.includes(path),`Missing offline asset ${path}`);
  }
- assert.match(html,/rel="manifest"/);
+ assert.match(html,/src="\.\/src\/app\.js\?v=3\.0\.0"/);
+ assert.match(html,/href="\.\/src\/styles\.css\?v=3\.0\.0"/);
+ assert.match(worker,/const RELEASE='3\.0\.0'/);
+ assert.match(worker,/const CACHE='precision-gauge-v11'/);
+ assert.match(worker,/url\.searchParams\.get\('v'\)===RELEASE/);
 });
 
 test('batch workspace integrates without changing dock geometry',()=>{
@@ -58,7 +62,7 @@ test('batch workspace integrates without changing dock geometry',()=>{
   'batch-count','batch-good','batch-bad','batch-readings','batch-undo','batch-export','batch-delete']){
   assert.equal((html.match(new RegExp('id="'+id+'"','g'))||[]).length,1);
  }
- assert.match(app,/initBatch\(\{getCurrent:\(\)=>current,toast\}\)/);
+ assert.match(app,/initBatch\(\{getCurrent:\(\)=>current,toast,navigate:switchPage\}\)/);
  assert.match(css,/\.dock\{position:fixed;left:50%;transform:translateX\(-50%\);bottom:2px;width:87%;height:68px;/);
  for(const path of ['./src/batch.js','./src/batch-core.js'])assert.ok(worker.includes("'"+path+"'"));
 });
@@ -77,7 +81,7 @@ test('premium stays offline-friendly and retains fixed dock source of truth',()=
  assert.doesNotMatch(html,/<script[^>]+https?:\/\//);
  assert.doesNotMatch(css,/@import\s+url\(/);
  assert.match(css,/\.dock\{position:fixed;left:50%;transform:translateX\(-50%\);bottom:2px;width:87%;height:68px;/);
- assert.match(worker,/precision-gauge-v10/);
+ assert.match(worker,/precision-gauge-v11/);
 });
 
 test('2.1 inspector provides accessible SVG chart point controls',()=>{
@@ -96,7 +100,7 @@ test('2.1 inspector provides accessible SVG chart point controls',()=>{
 
 test('WOW polish keeps instrument semantics and settings accessible',()=>{
  assert.match(html,/id="result-card" data-state="empty"/);
- assert.match(html,/class="settings-version">V 2\.2</);
+ assert.match(html,/class="settings-version">V 3\.0</);
  assert.match(html,/<details class="surface engineering-help" id="engineering-help">/);
  assert.match(html,/<summary>/);
  assert.match(html,/data-theme-choice="dark"[^>]+><svg/);
@@ -107,4 +111,17 @@ test('WOW polish keeps instrument semantics and settings accessible',()=>{
  assert.match(css,/\.engineering-help-content\{/);
  assert.match(css,/\.measure-status strong:before/);
  assert.doesNotMatch(css,/\.dock\{[^}]+(?:visualViewport|innerHeight|safe-area-inset-bottom)/);
+});
+
+test('Full Pro history and backup controls remain accessible',()=>{
+ for(const id of ['history-panel-batches','history-panel-calcs','history-filter-all','history-filter-good',
+ 'history-filter-bad','history-batches','backup-file','backup-export','backup-import']){
+  assert.equal((html.match(new RegExp('id="'+id+'"','g'))||[]).length,1);
+ }
+ assert.match(app,/getSavedBatchOverviews\(\)/);
+ assert.match(app,/openSavedBatch\(batch\.id\)/);
+ assert.match(app,/parseBackup\(await file\.text\(\)\)/);
+ assert.match(html,/settings-feature-indicator/);
+ assert.match(html,/>OFFLINE<\/span>/);
+ assert.match(html,/class="settings-version">V 3\.0/);
 });
