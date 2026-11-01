@@ -40,7 +40,7 @@ test('dock remains fixed to the browser-independent body layout',()=>{
 
 test('small phones and reduced-motion settings are supported',()=>{
  assert.match(css,/@media\(max-width:400px\)/);
- assert.match(css, /\.measure-card\{grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)\}/);
+ assert.match(css,/\.measure-card\{[^}]*grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)/);
  assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
 });
 
@@ -61,4 +61,21 @@ test('batch workspace integrates without changing dock geometry',()=>{
  assert.match(app,/initBatch\(\{getCurrent:\(\)=>current,toast\}\)/);
  assert.match(css,/\.dock\{position:fixed;left:50%;transform:translateX\(-50%\);bottom:2px;width:87%;height:68px;/);
  for(const path of ['./src/batch.js','./src/batch-core.js'])assert.ok(worker.includes("'"+path+"'"));
+});
+
+test('premium theme controls support system, graphite and titanium',()=>{
+ for(const preference of ['auto','dark','light']){
+  assert.match(html,new RegExp('data-theme-choice="'+preference+'"'));
+ }
+ assert.match(app,/function applyTheme\(preference,persist=true\)/);
+ assert.match(app,/matchMedia\('\(prefers-color-scheme: light\)'\)/);
+ assert.match(css,/--bg:#0a1117/);
+ assert.match(css,/:root\[data-theme=light\]/);
+ assert.match(html,/id="history-total"/);
+});
+test('premium stays offline-friendly and retains fixed dock source of truth',()=>{
+ assert.doesNotMatch(html,/<script[^>]+https?:\/\//);
+ assert.doesNotMatch(css,/@import\s+url\(/);
+ assert.match(css,/\.dock\{position:fixed;left:50%;transform:translateX\(-50%\);bottom:2px;width:87%;height:68px;/);
+ assert.match(worker,/precision-gauge-v8/);
 });
