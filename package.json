@@ -1,1 +1,10 @@
-{"name":"precision-gauge-pro","version":"1.0.0","private":true,"type":"module","scripts":{"test":"node --test tests/*.test.mjs","check":"node --check src/core.js && node --check src/app.js && node --check sw.js && npm test"}}
+{
+  "name": "precision-gauge-pro",
+  "version": "2.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check src/core.js && node --check src/app.js && node --check src/inspection.js && node --check src/batch.js && node --check src/batch-core.js && node --check sw.js && npm test"
+  }
+}
